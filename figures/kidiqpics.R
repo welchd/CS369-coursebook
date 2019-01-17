@@ -1,0 +1,7 @@
+library(foreign)
+library(ggplot2)
+iq <- read.dta("http://www.stat.columbia.edu/~gelman/arm/examples/child.iq/kidiq.dta")
+qplot(x = mom_iq, y = kid_score, data = iq, xlab = "Mother's IQ score", ylab = "Child's score in cognitive test")  +theme(text = element_text(size=28))
+ggsave("kidiq.pdf")
+qplot(x = mom_iq, y = kid_score, data = iq, xlab = "Mother's IQ score", ylab = "Child's score in cognitive test") + stat_smooth(method = lm, se = F)  + theme(text = element_text(size=28))
+ggsave("kidiqlm.pdf")

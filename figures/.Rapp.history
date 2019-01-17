@@ -1,0 +1,257 @@
+76000/.5
+plot(fit)
+8/254
+130/4
+167 + 17*6
+167 + 17*7
+167 + 17*8
+13.75*1.02
+13.75*1.021
+13.75*1.03
+13.75*1.05
+13.75*1.1
+8176/38.05
+5176/38.05
+5177/137
+38*137
+1000/.5
+1.05*1000/.5
+1.05*1/.5
+.5/1.05
+.5/1.047
+.49/1.047
+.4/1.047
+1/.47
+1/.4
+70000/.47
+70000/.4
+help(package = outbreaker)
+library(outbreaker)
+737*1.15
+737*1.15/950
+950/737*1.15
+950/(737*1.15)
+1/1.996
+1/1.98
+x= seq(10,90,by = 5)
+x
+y = c(1.5,9,12.5,10.8,12,12.6,14.8,15.7,16.6,15.9,12,9.8,11.2,11,10.8,11.1,5.4)
+plot(x,y)
+plot(x,y,type = "l")
+plot(x,y,type = "l",xlab = "Age",ylab = "Rate")
+exp(-0.7)
+exp(-0.71)
+exp(1.1)
+88/55
+mon = c( 'ptal237', 'aahf033', 'ikar847', 'rwes811', 'mman899', 'vvit697', 'cmor383', 'then840', 'lbel173', 'seva061', 'bwat171')
+mon
+fri = c('psha558', 'ptal237', 'tatk627', 'aahf033', 'skav640', 'ikar847', 'rwes811', 'mman899', 'vvit697', 'cmor383', 'seva061', 'bwat171')
+unique(c(mon,fri))
+wed1 = c('ikar847', 'rwes811', 'vvit697', 'tpen232', 'cmor383', 'seva061', 'bwat171')
+length(unique(c(mon,fri)))
+length(unique(c(mon,fri,wed1)))
+wed3 = c('rkle759', 'ptal237', 'aahf033', 'ikar847', 'rwes811', 'tpen232', 'cmor383', 'smcl773')
+length(unique(c(mon,fri,wed3)))
+unique(c(mon,fri,wed3))
+sort(unique(c(mon,fri,wed3)))
+mon11 = mon
+mon12 = c('rkle759', 'aahf033', 'ikar847', 'rwes811', 'mman899', 'vvit697', 'then840', 'seva061', 'bwat171')
+tues1 = c('tatk627', 'ikar847', 'rwes811', 'mman899', 'vvit697', 'tpen232', 'cmor383', 'then840', 'bwat171')
+length(unique(c(mon11,tues1)))
+length(unique(c(mon11,tues1,wed1)))
+length(unique(c(mon11,tues1,wed3)))
+wed4 = c(ptal237, ikar847, cmor383, smcl773, seva061)
+wed4 = c('ptal237', 'ikar847', 'cmor383', 'smcl773', 'seva061')
+wed4
+length(unique(c(mon11,tues1,wed4)))
+length(unique(c(mon11,wed4,fri3)))
+length(fri)
+fri3 = fri
+length(unique(c(mon11,fri3,wed3)))
+a = matrix(3,4,1,1,nrow = 2,byrow = T)
+a = matrix(c(3,4,1,1),nrow = 2,byrow = T)
+a
+a = matrix(c(3,5,1,-1),nrow = 2,byrow = T)
+eigen(a)
+a = matrix(c(3,5,1,-1),nrow = 2,byrow = T)
+a
+rnorm(20,100,10)
+round(rnorm(20,100,10))
+round(rnorm(20,180,10))
+plot(rnorm(1000))
+plot(rnorm(1000),type = "l")
+(pc.cr <- princomp(USArrests))  # inappropriate#
+princomp(USArrests, cor = TRUE) # =^= prcomp(USArrests, scale=TRUE)
+USArrests
+summary(pc.cr <- princomp(USArrests, cor = TRUE))
+loadings(pc.cr)
+plot(pc.cr)
+biplot(pc.cr)
+? biplot
+summary(prcomp(USArrests, scale = TRUE))
+c = prcomp(USArrests, scale = TRUE)
+c
+summay(c)
+summary(c)
+names(c)
+86/75
+150:150
+sample(150:150,1)
+A = matrix(c(2,3,0,2,2,0,3,0,1,3,2,2),nrow = 4, byrow = T)
+A
+svd(A)
+b = svd(A)
+b$u %*% t(b$v)
+b$u %*% t(b$v) * b$d[1]
+A1 = b$u %*% t(b$v) * b$d[1]
+svd(A1)
+2x^3 - 15x^2 + 36x - 23
+2*x^3 - 15*x^2 + 36*x - 23
+x = seq(-5,10,by = 0.1)
+2*x^3 - 15*x^2 + 36*x - 23
+plot(x, 2*x^3 - 15*x^2 + 36*x - 23)
+x = seq(-1,6,by = 0.01)
+plot(x, 2*x^3 - 15*x^2 + 36*x - 23)
+line(y = 0)
+abline(h = 0)
+\exp(0.1x) - \exp(-0.4x) - 2
+plot(x, exp(0.1*x) - exp(-0.4*x) - 2 )
+abline(h = 0)
+plot(x, exp(0.1*x) - exp(-0.4*x) - 2 )
+x = seq(-1,10,by = 0.01)
+plot(x, exp(0.1*x) - exp(-0.4*x) - 2 )
+abline(h = 0)
+plot(x, exp(0.1*x) - exp(-0.4*x) )
+abline(h = 0)
+plot(x, exp(0.1*x) - exp(-0.4*x) - 1 )
+abline(h = 0)
+plot(x, exp(0.1*x) - exp(-0.4*x) - 1 )
+uniroot(function(x) exp(0.1*x) - exp(-0.4*x) - 1)
+uniroot(function(x) exp(0.1*x) - exp(-0.4*x) - 1,c(0,4))
+uniroot(function(x) exp(0.1*x) - exp(-0.4*x) ,c(0,4))
+uniroot(function(x) 2*x^3 - 15*x^2 + 36*x - 23 ,c(0,4))
+uniroot(function(x) 2*x^3 - 15*x^2 + 36*x - 22 ,c(0,4))
+uniroot(function(x) 2*x^3 - 15*x^2 + 36*x - 24 ,c(0,4))
+uniroot(function(x) 2*x^3 - 15*x^2 + 35*x - 24 ,c(0,4))
+uniroot(function(x) 2*x^3 - 15*x^2 + 34*x - 24 ,c(0,4))
+uniroot(function(x) 2*x^3 - 15*x^2 + 35*x - 24 ,c(0,4))
+uniroot(function(x) 2*x^3 - 15*x^2 + 35*x - 22 ,c(0,4))
+uniroot(function(x) 2*x^3 - 15*x^2 + 35*x - 30 ,c(0,4))
+uniroot(function(x) 2*x^3 - 15*x^2 + 35*x - 26 ,c(0,4))
+uniroot(function(x) 2*x^3 - 15*x^2 + 35*x - 25 ,c(0,4))
+uniroot(function(x) 2*x^3 - 15*x^2 + 35*x - 24 ,c(0,4))
+plot(x,2*x^3 - 15*x^2 + 35*x - 24)
+abline(h = 0)
+plot(x,2*x^3 - 15*x^2 + 35*x - 22)
+abline(h = 0)
+plot(x,2*x^3 - 15*x^2 + 35*x - 20)
+abline(h = 0)
+plot(x,2*x^3 - 15*x^2 + 35*x - 20,ylim = c(-1,1))
+abline(h = 0)
+plot(x,2*x^3 - 15*x^2 + 35*x - 22,ylim = c(-1,1))
+abline(h = 0)
+10000+45.2
+(10000+45.2)*1.15
+(10000+45.2)*1.15 + 1470.6
+b = (2,4,1,4,2,5,6,7)
+b = c(2,4,1,4,2,5,6,7)
+x = c(1,2,2,3,4,4,5,6)
+plot(x,b)
+x = seq(0,1,1000)
+plot(x,dbeta(x,1,1/3))
+plot(x,pbeta(x,1,1/3))
+plot(x,dbeta(x,1,1/3))
+? seq
+x = seq(0,1,length  =1000)
+plot(x,dbeta(x,1,1/3))
+hist(rbeta(1000,1,1/3))
+mean(rbeta(1000,1,1/3))
+model
+ls
+9800/28
+dexp(seq(0,5,n = 100))
+dexp(seq(0,5,l = 100))
+plot(dexp(seq(0,5,l = 100)))
+plot(pexp(seq(0,5,l = 100)))
+plot(pexp(seq(0,5,l = 100)),type = "l")
+plot(,seq(0,5,l = 100)pexp(seq(0,5,l = 100)),type = "l",xlab= )
+plot(,seq(0,5,l = 100),pexp(seq(0,5,l = 100)),type = "l",ylab = "x")
+plot(seq(0,5,l = 100),pexp(seq(0,5,l = 100)),type = "l",ylab = "x")
+plot(seq(0,5,l = 100),pexp(seq(0,5,l = 100)),type = "l",xlab = "X",ylab = "cdf")
+u = 0.66
+-log(u)
+-log(1-u)
+abline(h = u)
+plot(seq(0,5,l = 100),pexp(seq(0,5,l = 100)),type = "l",xlab = "X",ylab = "cdf")
+u = .76
+abline(h = u)
+abline(v = -log(1-u))
+abline(v = -log(1-u),lty = 2)
+plot(seq(0,5,l = 100),pexp(seq(0,5,l = 100)),type = "l",xlab = "X",ylab = "cdf")
+abline(v = -log(1-u),lty = 2)
+abline(v = -log(1-u),lty = 2,col = 2)
+? abline
+plot(seq(0,5,l = 100),pexp(seq(0,5,l = 100)),type = "l",xlab = "X",ylab = "cdf")
+line(x = c(0,-log(1-u)),y = c(u,u))
+lines(x = c(0,-log(1-u)),y = c(u,u))
+lines(x = c(-1,-log(1-u)),y = c(u,u))
+lines(x = c(-1,-log(1-u)),y = c(u,u),lty = 2,col = 2)
+plot(seq(0,5,l = 100),pexp(seq(0,5,l = 100)),type = "l",xlab = "X",ylab = "cdf")
+lines(x = c(-1,-log(1-u)),y = c(u,u),lty = 2,col = 2)
+lines(x = c(-log(1-u),-log(1-u)),y = c(-1,u),lty = 2,col = 2)
+axis(side = 1, at = u)
+axis(side = 1, at = -log(1-u))
+axis(side = 1, at = round(-log(1-u),3))
+plot(seq(0,5,l = 100),pexp(seq(0,5,l = 100)),type = "l",xlab = "X",ylab = "cdf")
+plot(seq(0,5,l = 100),pexp(seq(0,5,l = 100)),type = "l",xlab = "X",ylab = "cdf")#
+lines(x = c(-1,-log(1-u)),y = c(u,u),lty = 2,col = 2)#
+lines(x = c(-log(1-u),-log(1-u)),y = c(-1,u),lty = 2,col = 2)#
+axis(side = 2, at = u)#
+axis(side = 1, at = round(-log(1-u),3))
+u
+plot(seq(0,5,l = 100),pexp(seq(0,5,l = 100)),type = "l",xlab = "X",ylab = "cdf")
+lines(x = c(-1,-log(1-u)),y = c(u,u),lty = 2,col = 2)
+lines(x = c(-log(1-u),-log(1-u)),y = c(-1,u),lty = 2,col = 2)
+axis(side = 2, at = u)
+plot(seq(0,5,l = 100),pexp(seq(0,5,l = 100)),type = "l",xlab = "X",ylab = "cdf")
+lines(x = c(-1,-log(1-u)),y = c(u,u),lty = 2,col = 2)
+lines(x = c(-log(1-u),-log(1-u)),y = c(-1,u),lty = 2,col = 2)
+axis(side = 2, at = u)
+axis(side = 1, at = round(-log(1-u),3))
+u = 0.72
+plot(seq(0,5,l = 100),pexp(seq(0,5,l = 100)),type = "l",xlab = "X",ylab = "cdf")
+lines(x = c(-1,-log(1-u)),y = c(u,u),lty = 2,col = 2)
+lines(x = c(-log(1-u),-log(1-u)),y = c(-1,u),lty = 2,col = 2)
+axis(side = 2, at = u)
+axis(side = 1, at = round(-log(1-u),3))
+? axis
+axis(side = 2, at = u, col = 2)
+axis(side = 2, at = u, col = 4)
+axis(side = 2, at = u, col = 2)
+plot(seq(0,5,l = 100),pexp(seq(0,5,l = 100)),type = "l",xlab = "X",ylab = "cdf")
+axis(side = 2, at = u, col = 2)
+axis(side = 1, at = round(-log(1-u),3),col = 4)
+lines(x = c(-log(1-u),-log(1-u)),y = c(-1,u),lty = 2,col = 4)
+lines(x = c(-1,-log(1-u)),y = c(u,u),lty = 2,col = 2)
+u = 0.72#
+plot(seq(0,5,l = 100),pexp(seq(0,5,l = 100)),type = "l",xlab = "X",ylab = "cdf")#
+lines(x = c(-1,-log(1-u)),y = c(u,u),lty = 2,col = 2)#
+lines(x = c(-log(1-u),-log(1-u)),y = c(-1,u),lty = 2,col = 2)#
+axis(side = 2, at = u, col = 2)#
+axis(side = 1, at = round(-log(1-u),3),col = 2)#
+#
+dev.copy(pdf("inversionsample.pdf"))
+dev.off()
+dev.copy2pdf(file = "inversionsample.pdf")
+dbinom(0:5,5,.3)
+sum(dbinom(0:5,5,.3))
+round(dbinom(0:5,5,.3),3)
+cumsum(round(dbinom(0:5,5,.3),3))
+round(cumsum(dbinom(0:5,5,.3),3))
+round(cumsum(dbinom(0:5,5,.3)),3)
+runif()
+runif(1)
+75/223
+21/107
+5/40
+content
