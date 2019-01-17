@@ -26,10 +26,10 @@
 
 \DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
 
-\title{369 Computational Science}
+\title{369 Computational Biology}
 % Maximisation, matrix decomposition, probability, inference, simulation, bioinformatics and phylogenetics}
 \author{Compiled, collated and written by David Welch\\ 
-Sections \ref{sec:intro}-\ref{sec:leastsquares} are based on slides by Georgy Gimel'farb,  sections 16--18 are\\ based on the book Biological Sequence Analysis by Durbin et al. 2010. \\ Other sections are incompletely referenced so \\ presence in these notes is no claim of authorship.}
+Sections \ref{sec:align}--\ref{sec:parsimony} are\\ based on the book Biological Sequence Analysis by Durbin et al. 2010. \\ Other sections are incompletely referenced so \\ presence in these notes is no claim of authorship.}
 \date{2019}                                           % Activate to display a given date or no date
 \begin{document}
 \maketitle
@@ -53,14 +53,12 @@ Sections \ref{sec:intro}-\ref{sec:leastsquares} are based on slides by Georgy Gi
 
 
 
-\input{./369linalgnotes.tex}
+%\input{./369linalgnotes.tex}
 %\end{document}
 %\addtocounter{section}{9}
 %\addtocounter{page}{44}
 
 
-
-\newpage
 
 \section{Introduction to stochastic processes and probability}
 
@@ -777,7 +775,7 @@ To model  the complex random process of genetic mutation and inheritance, we wil
 %\end{document}
 
 \section{Alignment}
-
+\label{sec:align}
 \subsection{Homology}
 
 Homology (from the Greek, to agree) is a crucial concept in biology referring to traits or, in the case of sequences,  sequence regions  that share a common ancestry.  We expect homologous regions to be similar to each other where the level of similarity will depend on how recently they shared a common ancestor.
@@ -2564,6 +2562,7 @@ However, these are worst case complexities, and there are various heuristics tha
 
 
 \subsection{Parsimony}
+\label{sec:parsimony}
 
 Parsimony is  form of Occam's razor. It postulates that the best tree is the one that requires the fewest changes along it to explain all sequences.  This best tree is called the most parsimonious tree or the {\em (maximum)  parsimony tree}.  
 
