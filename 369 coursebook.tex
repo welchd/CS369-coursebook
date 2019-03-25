@@ -29,7 +29,7 @@
 \title{369 Computational Biology}
 % Maximisation, matrix decomposition, probability, inference, simulation, bioinformatics and phylogenetics}
 \author{Compiled, collated and written by David Welch\\ 
-Sections \ref{sec:align}--\ref{sec:parsimony} are\\ based on the book Biological Sequence Analysis by Durbin et al. 2010. \\ Other sections are incompletely referenced so \\ presence in these notes is no claim of authorship.}
+Sections \ref{sec:HMM}--\ref{sec:HMMapplication} are\\ based on the book Biological Sequence Analysis by Durbin et al. 2010. \\ Other sections are incompletely referenced so \\ presence in these notes is no claim of authorship.}
 \date{2019}                                           % Activate to display a given date or no date
 \begin{document}
 \maketitle
@@ -58,770 +58,770 @@ Sections \ref{sec:align}--\ref{sec:parsimony} are\\ based on the book Biological
 %\addtocounter{section}{9}
 %\addtocounter{page}{44}
 
-\section{Introduction to genetics and genetic terminology }
-
-%The history of life can be viewed, in a rather mundane way,  as a long running and very complex stochastic (or random) process.
-
-At a very basic level, and after many simplifying assumptions, we can think of the historical process explaining the relationships between species as a tree.   The points where the tree splits are speciations and the leaves of the tree are different  species.  The past is back at the base or root of the tree and time increases from the root to the tips.  Information is passed along  the tree (away from the root) from one generation to the next via genetic material.
-
-Genetic material is thought to be the only means by which biological information is passed from parent to offspring.  The process of copying genetic material is imperfect, so that children will differ slightly from the parent.  These imperfections consist of errors in the copying, known as mutations, and can be thought of as a stochastic process.
-
-The fundamental objects we will be studying are sequences of characters representing biological macromolecules: DNA (Deoxyribonucleic),   RNA  (Ribonucleic acid) and proteins.  DNA are RNA are the primary forms of genetic material.    The characters in DNA and RNA sequences are drawn from 4 letter alphabets: DNA has $\Omega = \{A,C,G,T \}$ while RNA has $\Omega = \{A,C,G,U \}$.  The A stands for adenine, C for cytosine, G for guanine, T for thymine and U for uracil. These are known as nucleobases or simply bases, with $C,T,U$ being {\em pyramidines } and $A,G$ being {\em purines}.    Protein sequences consist of the twenty amino acids that are represented by the alphabet $\{ A,R,N,D,C,E,Q,G,H,I,L,K,M,F,P,S,T,W,Y,V\}$ (that is, all the letters except $\{ B,J,O,U,X,Z \}$). We will refer to the bases in an DNA/RNA sequence or the amino acids in a protein sequence as {\em residues}. 
-
-In eukaryotes (organisms with cells that  have a nucleus), the three types of sequences related to each other by the Central Dogma of  Molecular Biology that states, DNA makes RNA makes Protein.  Or, more prosaically,   DNA is {\em transcribed} into a type of RNA called mRNA that is then {\em translated} into protein.  
-
-There are some good animations showing how translation and transcription work at \url{www.hhmi.org/biointeractive/animations/index.html}, in particular see the DNA transcription and translation animations.  A Japanese anime style film of the central dogma is also worth a look: \url{http://www.youtube.com/watch?v=-ygpqVr7_xs}. 
-
-Parts of the the DNA sequence encode information for proteins.  These regions are known as genes and must be transcribed to RNA before being built into proteins.  When the DNA is transcribed to RNA, all bases are copied exactly except that $T$ (thymine) is transcribed as $U$ (uracil).  Once copied, the RNA is edited at splice sites so that only exons remain (the introns are edited out).  This leaves the {\em messenger RNA}, mRNA, which is then  translated to a protein sequence (poly-peptide chain).  This translation  occurs via the genetic code which translates consecutive triples of RNA bases (known as a codon) into one of the 20 amino acids.  There are $4^3 = 64$ possible codes since there is an alphabet of 4 bases.  60 of these code for proteins, 1 (AUG) is a start codon and 3 (UAA, UGA and UAG) are stop codons signalling the start or finish of a protein.  A particular  amino acid may be encoded by just one codon (e.g. AUG$\rightarrow$Methionine(M)) or up to 6 (e.g. any of  UUA, UUG, CUU, CUC, CUA, CUG$\rightarrow$Leucine (L)).    Once the poly-peptide chain is formed it folds into three dimensional molecule, taking on a particular structure.
-
-{\bf Example:} The sequence {\tt atgaggttgacgctactttgttgcacctggagggaa} can be split into codons {\tt atg agg ttg acg cta ctt tgt tgc acc tgg agg gaa} which translate into the protein sequence {\tt MRLTLLCCTWRE}. \sqend
-
-In this course, we are only interested in the primary structure of sequences, that is, the order in which residues occur along the sequence.  We will ignore the secondary, tertiary and quaternary structure of proteins ---  secondary structure is the name for  the regular substructures such as alpha helices and beta sheets, the tertiary structure are the three dimensional structures of single molecules while quaternary structure are the complex forms taken by collections of single protein molecules.  The study of these more complex structures is known as structural bioinformatics.
-
-When DNA is passed from one generation to the next, the copy made is not exact.    There are a number of processes that cause differences to arise between the parent and child.  Recombination is one such process and involves the mixing of the maternal and paternal copies of DNA when the gametes (eggs or sperm) are produced.  Other processes are generally thought of as mutations.  The simplest are {\em point mutations} where the offspring sequence differs from the parent sequence by a single base (residue).  This type of mutation is called a {\em single nucleotide polymorphism}, abbreviated as SNP and pronounced `snip'.   {\em Insertions} (or deletions) refer to the child sequence gaining (losing) one or more base than the parent.  Larger scale mutations include: {\em gene duplication} which is a large scale  insertion where the child inherits  extra copy of a region containing a whole gene.  Other large scale  mutations include inversions (part of the sequence is reversed end to end) and translocations (a piece of the sequence is copied out of order).
-
-
-{\bf Examples of mutations}: Consider the short sequence 
-{\tt cgctcaccatgaagcgtttcactaat}.  We demonstrate types of mutations showing the original sequence and a mutated version of it below with X marking the mutation.
-\begin{itemize}
-\item Single nucleotide polymorphism (SNP) \\
-{\tt cgctcaccatgaagcgtttcactaat}\\
-{\tt cgctcgccatgaagcgtttcactaat}\\
-{\tt .....X....................}
-\item Insertion \\
-{\tt cgctcacc----atgaagcgtttcactaat}\\
-{\tt cgctcacctgatatgaagcgtttcactaat}\\
-{\tt ........XXXX..................}
-\item Deletion \\
-{\tt cgctcaccatgaagcgtttcactaat}\\
-{\tt cgct----atgaagcgtttcactaat}\\
-{\tt ....XXXX..................}
-\item Duplication (the copied region is marked with parentheses).  Note that duplication usually refers to gene duplication where whole genes are copied. \\
-{\tt cgctcaccatgaagcgtttcacta-----------at}\\
-{\tt cgctcaccatgaagcgtttcactacaccatgaagcat}\\
-{\tt ....(.........).........XXXXXXXXXXX..}
-\item Inversion (again, this typically happens at a larger scale than shown here) \\
-{\tt cgctcaccatgaagcgtttcactaat}\\
-{\tt cgctctaccagaagcgtttcactaat}\\
-{\tt .....XXXXX................}
-
-\end{itemize} \sqend
-
- 
-
-All these processes can be modelled and studied, with varying degrees of difficulty.  We'll focus primarily on the question of how to align the sequences, how to identify regions of interest in sequences (for example, genes), and given aligned sequences, how can we reconstruct the evolutionary history (the tree) of those sequences.  This last problem will require us to model the the mutation process where we restrict ourselves to looking at how point mutations arise.
-
-The models we use will use are relatively simple, sometimes to the point of being downright crude.  It is good to keep in mind the quote from the famous statistician George Box who said, ``All models are wrong but some are useful''.
-
-\subsection{Summary of above} 
-\begin{itemize}
-\item We model genetic sequences: think of them as strings of letters.
-\item There are 3 types of sequence, DNA, RNA or Protein.
-\item DNA sequences are composed of the 4 letters, or bases, $ \{A, C, G, T \}$,  RNA is made of the bases $\{A,C,G,U\}$ while protein sequences are made up of the 20 amino acids. 
-\item The three types of sequence are related by the central dogma of molecular biology: DNA is transcribed to RNA and then translated to protein.  
-\item Protein sequences fold up into more complex structures.  We will ignore this structure in this introductory course.
-\item DNA is copied from parent to child.  
-\item At copying, mutations are introduced. 
-\item Mutations may be single nucleotide polymorphisms (SNPs), insertions, deletions or of other types.
-\item We use a tree to  model the history of relationships between individuals (which are represented by their sequences).
-\end{itemize}
-
-
-To model  the complex random process of genetic mutation and inheritance, we will need  tools from applied probability and statistics.  The next few sections are concerned with introducing the main tools and concepts that we will use for our study.  All of you will have previously encountered at least some of the ideas we discuss here  but, as with the linear algebra sections, it helps to review the main points before plunging in to new material.
-
-
-\section{Alignment}
-\label{sec:align}
-\subsection{Homology}
-
-Homology (from the Greek, to agree) is a crucial concept in biology referring to traits or, in the case of sequences,  sequence regions  that share a common ancestry.  We expect homologous regions to be similar to each other where the level of similarity will depend on how recently they shared a common ancestor.
-
-Thus to say two regions are homologous is an evolutionary hypothesis.  Mrs Darwin (in Carol Ann Duffy's poem from the collection The World's Wife) was making an evolutionary hypothesis of homology:
-
-7 April 1852 \\
-Went to the Zoo.\\
-I said to Him --- \\
-Something about that Chimpanzee over there reminds me of you.
-
-The claim does not imply that the regions share a similar function now or, depending on the time since divergence, that they  even particularly similar, just that they share a common ancestor.  Therefore, sequences are either homologous or not, there are no degrees of homology. We often infer homology between two sequences when they are similar but we must be careful as we can get similarity without homology.  Homologous sequences are sometimes referred to as {\em homologs}.
-
-There are two main ways that we get similarity without homology: either by chance or by convergent evolution.  Similarity by chance will occur even in completely random sequences on a finite alphabet.  In two random sequences of four letters, we would expect similarity by chance of 25\%.  
-
-Convergent evolution occurs when similar functions evolve independently of each other.  An example of this are the wings of birds and insects.  We don't believe these two very different creatures had a common ancestor that evolved wings but that wings evolved indecently of each other in the insect and bird lineages.  Thus, while wings in a fly and a sparrow may be superficially similar, they are not considered homologous.  The same applies to sequences that code for similar proteins (i.e., have similar function) but have evolved independently.  Such traits/regions are called analogous.
-
-We distinguish between two types of homology: orthology and paralogy:
-\begin{description}
-\item[Orthology] occurs when two genes are separated by a speciation event and evolve independently from there on.   
-\item[Paralogy] occurs when a region of the genome is duplicated in the same genome (a duplication event) and they evolve in parallel in the same genome.  The two copies are said to be paralogs.
-\end{description}
-
-
-\subsection{Pairwise alignment}
-
-
-
-Given two sequences, if they are homologues, how do they align with each other?  That is, exactly which sites in the sequence are homologous with each other?  
-
-We consider pairs of sequences, $x$ and $y$ of length $m$ and $n$, respectively. $x_i$ is the $i$th symbol of $x$. These symbols are usually the 4 DNA or RNA bases or the 20 amino acids. We refer to the symbols as {\em  residues}.
-
-We will allow {\em gaps} to be introduced in either sequence to allow them to align better.   Biologically, gaps correspond to insertions or deletions in the sequence.
-
-Clearly, there are many ways of aligning a pair of sequences (how many?), but what is the best alignment?
-
-Example: x = GAATTC and y =  GATTA 
-\begin{verbatim} 
-GAATTC or GAATTC-
-GA-TTA    -GATT-A
-\end{verbatim}
-are two possible alignments. \hfill $\square$
-
-\subsection{Scoring alignments}
-
-The best alignment will depend on how we score alignments.  It is easy to come up with different scoring regimes (e.g., score 1 for a match, -1 for a mismatch) but we really want to compare two models --- that the similarity we see is just chance vs. that the sequences are homologs. 
-
-We initially consider alignments without gaps.
-
-
-%% DW: The following two sections (model of (non-)homologous sequences) use probability concepts that are not yet introduced. Makes sense to replace them with something less rigorous here and then come back to it later in course after the necessary probability has been discussed.
-
-\subsubsection{Model of non-homologous  sequences}
-
-%The most basic model is that each letter appears with some probability, letter $a$ appears with probability $q_a$ (note that the probabilities summed over the alphabet are 1), that each site is independent and that the each sequence is independent. Then the probability of seeing sequence $x$ is
-%\[ P(x) = \prod_{i = 1}^n q_{x_i} \]
-%and the joint likelihood of an alignment is just the joint probability of the sequences $x$
-%and $y$,
-%\[ P(x,y) = P(x)P(y) = \prod_{i = 1}^n q_{x_i} \prod_{i = 1}^m q_{y_i} = \prod_{i = 1}^n q_{x_i}q_{y_i}.  \]
-
-
-
-
-\subsubsection{Model  of homologous  sequences}
-
-
-%An alternative model is that the two sequences are related and the probability of seeing
-%the pair of residues $a$ (from $x$) and $b$ (from $y$) aligned at a locus is $p_{ab}$. The probability of the alignment is then the product of the loci,
-%\[ P(x,y) = \prod_{i = 1}^n p_{x_iy_i}. \]
+%\section{Introduction to genetics and genetic terminology }
+%
+%%The history of life can be viewed, in a rather mundane way,  as a long running and very complex stochastic (or random) process.
+%
+%At a very basic level, and after many simplifying assumptions, we can think of the historical process explaining the relationships between species as a tree.   The points where the tree splits are speciations and the leaves of the tree are different  species.  The past is back at the base or root of the tree and time increases from the root to the tips.  Information is passed along  the tree (away from the root) from one generation to the next via genetic material.
+%
+%Genetic material is thought to be the only means by which biological information is passed from parent to offspring.  The process of copying genetic material is imperfect, so that children will differ slightly from the parent.  These imperfections consist of errors in the copying, known as mutations, and can be thought of as a stochastic process.
+%
+%The fundamental objects we will be studying are sequences of characters representing biological macromolecules: DNA (Deoxyribonucleic),   RNA  (Ribonucleic acid) and proteins.  DNA are RNA are the primary forms of genetic material.    The characters in DNA and RNA sequences are drawn from 4 letter alphabets: DNA has $\Omega = \{A,C,G,T \}$ while RNA has $\Omega = \{A,C,G,U \}$.  The A stands for adenine, C for cytosine, G for guanine, T for thymine and U for uracil. These are known as nucleobases or simply bases, with $C,T,U$ being {\em pyramidines } and $A,G$ being {\em purines}.    Protein sequences consist of the twenty amino acids that are represented by the alphabet $\{ A,R,N,D,C,E,Q,G,H,I,L,K,M,F,P,S,T,W,Y,V\}$ (that is, all the letters except $\{ B,J,O,U,X,Z \}$). We will refer to the bases in an DNA/RNA sequence or the amino acids in a protein sequence as {\em residues}. 
+%
+%In eukaryotes (organisms with cells that  have a nucleus), the three types of sequences related to each other by the Central Dogma of  Molecular Biology that states, DNA makes RNA makes Protein.  Or, more prosaically,   DNA is {\em transcribed} into a type of RNA called mRNA that is then {\em translated} into protein.  
+%
+%There are some good animations showing how translation and transcription work at \url{www.hhmi.org/biointeractive/animations/index.html}, in particular see the DNA transcription and translation animations.  A Japanese anime style film of the central dogma is also worth a look: \url{http://www.youtube.com/watch?v=-ygpqVr7_xs}. 
+%
+%Parts of the the DNA sequence encode information for proteins.  These regions are known as genes and must be transcribed to RNA before being built into proteins.  When the DNA is transcribed to RNA, all bases are copied exactly except that $T$ (thymine) is transcribed as $U$ (uracil).  Once copied, the RNA is edited at splice sites so that only exons remain (the introns are edited out).  This leaves the {\em messenger RNA}, mRNA, which is then  translated to a protein sequence (poly-peptide chain).  This translation  occurs via the genetic code which translates consecutive triples of RNA bases (known as a codon) into one of the 20 amino acids.  There are $4^3 = 64$ possible codes since there is an alphabet of 4 bases.  60 of these code for proteins, 1 (AUG) is a start codon and 3 (UAA, UGA and UAG) are stop codons signalling the start or finish of a protein.  A particular  amino acid may be encoded by just one codon (e.g. AUG$\rightarrow$Methionine(M)) or up to 6 (e.g. any of  UUA, UUG, CUU, CUC, CUA, CUG$\rightarrow$Leucine (L)).    Once the poly-peptide chain is formed it folds into three dimensional molecule, taking on a particular structure.
+%
+%{\bf Example:} The sequence {\tt atgaggttgacgctactttgttgcacctggagggaa} can be split into codons {\tt atg agg ttg acg cta ctt tgt tgc acc tgg agg gaa} which translate into the protein sequence {\tt MRLTLLCCTWRE}. \sqend
+%
+%In this course, we are only interested in the primary structure of sequences, that is, the order in which residues occur along the sequence.  We will ignore the secondary, tertiary and quaternary structure of proteins ---  secondary structure is the name for  the regular substructures such as alpha helices and beta sheets, the tertiary structure are the three dimensional structures of single molecules while quaternary structure are the complex forms taken by collections of single protein molecules.  The study of these more complex structures is known as structural bioinformatics.
+%
+%When DNA is passed from one generation to the next, the copy made is not exact.    There are a number of processes that cause differences to arise between the parent and child.  Recombination is one such process and involves the mixing of the maternal and paternal copies of DNA when the gametes (eggs or sperm) are produced.  Other processes are generally thought of as mutations.  The simplest are {\em point mutations} where the offspring sequence differs from the parent sequence by a single base (residue).  This type of mutation is called a {\em single nucleotide polymorphism}, abbreviated as SNP and pronounced `snip'.   {\em Insertions} (or deletions) refer to the child sequence gaining (losing) one or more base than the parent.  Larger scale mutations include: {\em gene duplication} which is a large scale  insertion where the child inherits  extra copy of a region containing a whole gene.  Other large scale  mutations include inversions (part of the sequence is reversed end to end) and translocations (a piece of the sequence is copied out of order).
 %
 %
-%To compare these two models, we take ratio of these likelihoods:
-%\[ \frac{\prod_{i=1}^n p_{x_iy_i}}{ \prod_{i = 1}^n q_{x_i}q_{y_i}} = \prod_{i = 1}^n \frac{ p_{x_iy_i}}{q_{x_i}q_{y_i}}. \]
-%It is easier to work with log-likelihoods (and addition) than likelihoods and multiplica- tion, so we take the log of this quantity to get
-%\[ S= \sum_i s(x_,y_i) \]
-%where
-%\[ s(a,b) = \log\left(\frac{p_{ab}}{q_aq_b}\right).\]
-%The score of the alignment then is the sum over the local score $s(a, b)$. $s$ can be thought of as a matrix and is often referred to as a {\em score matrix } or {\em substitution matrix}. 
+%{\bf Examples of mutations}: Consider the short sequence 
+%{\tt cgctcaccatgaagcgtttcactaat}.  We demonstrate types of mutations showing the original sequence and a mutated version of it below with X marking the mutation.
+%\begin{itemize}
+%\item Single nucleotide polymorphism (SNP) \\
+%{\tt cgctcaccatgaagcgtttcactaat}\\
+%{\tt cgctcgccatgaagcgtttcactaat}\\
+%{\tt .....X....................}
+%\item Insertion \\
+%{\tt cgctcacc----atgaagcgtttcactaat}\\
+%{\tt cgctcacctgatatgaagcgtttcactaat}\\
+%{\tt ........XXXX..................}
+%\item Deletion \\
+%{\tt cgctcaccatgaagcgtttcactaat}\\
+%{\tt cgct----atgaagcgtttcactaat}\\
+%{\tt ....XXXX..................}
+%\item Duplication (the copied region is marked with parentheses).  Note that duplication usually refers to gene duplication where whole genes are copied. \\
+%{\tt cgctcaccatgaagcgtttcacta-----------at}\\
+%{\tt cgctcaccatgaagcgtttcactacaccatgaagcat}\\
+%{\tt ....(.........).........XXXXXXXXXXX..}
+%\item Inversion (again, this typically happens at a larger scale than shown here) \\
+%{\tt cgctcaccatgaagcgtttcactaat}\\
+%{\tt cgctctaccagaagcgtttcactaat}\\
+%{\tt .....XXXXX................}
+%
+%\end{itemize} \sqend
+%
+% 
+%
+%All these processes can be modelled and studied, with varying degrees of difficulty.  We'll focus primarily on the question of how to align the sequences, how to identify regions of interest in sequences (for example, genes), and given aligned sequences, how can we reconstruct the evolutionary history (the tree) of those sequences.  This last problem will require us to model the the mutation process where we restrict ourselves to looking at how point mutations arise.
+%
+%The models we use will use are relatively simple, sometimes to the point of being downright crude.  It is good to keep in mind the quote from the famous statistician George Box who said, ``All models are wrong but some are useful''.
+%
+%\subsection{Summary of above} 
+%\begin{itemize}
+%\item We model genetic sequences: think of them as strings of letters.
+%\item There are 3 types of sequence, DNA, RNA or Protein.
+%\item DNA sequences are composed of the 4 letters, or bases, $ \{A, C, G, T \}$,  RNA is made of the bases $\{A,C,G,U\}$ while protein sequences are made up of the 20 amino acids. 
+%\item The three types of sequence are related by the central dogma of molecular biology: DNA is transcribed to RNA and then translated to protein.  
+%\item Protein sequences fold up into more complex structures.  We will ignore this structure in this introductory course.
+%\item DNA is copied from parent to child.  
+%\item At copying, mutations are introduced. 
+%\item Mutations may be single nucleotide polymorphisms (SNPs), insertions, deletions or of other types.
+%\item We use a tree to  model the history of relationships between individuals (which are represented by their sequences).
+%\end{itemize}
 %
 %
-%There are various methods for deciding reasonable values for the entries of the matrix, discussed below.
-%Note that even when ad hoc values are chosen for the matrix, the underlying probabilities, $p_{ab}$ and $q_a$ can be derived by reversing the above argument.  That is, when a score matrix is selected we are making implicit assumptions about the $q_a$s and $p_{ab}$s.
-
-Example: If x = GAATTC and y =  GGATTA are aligned as 
-\begin{verbatim} 
-GAATTC
-GGATTA
-\end{verbatim}
-where $s(a,b) = 2$  if $a = b$ and $s(a,b) = -1$ if $a \neq b$, the alignments scores $2-1+2+2+2-1 = 6$. \hfill $\square$
-
-
-
-\subsection{Choosing the substitution matrix}
-
-For protein sequences, the quantities $p_{ab}$ and $q_a$ have been empirically estimated to produce score matrices.  In particular, the  BLOSUM (BLocks SUbstitution Matrix) matrix of which there are various types, e.g. Blosum 45 and Blosum 80.
-
-These matrices were calculated by studying a large number of confirmed alignments where there was considerable agreement between the sequences. The relative frequency of residues was calculated (to estimates for  the $q_a$s.) and the relative frequencies of pairs of residues was calculated  (to give estimates for  the $p_{ab}$s). The relative frequencies were then scaled to give integer entries in the matrix.  The number after the matrix represents the similarity of the sequences used to estimate the matrix, so matrices with higher numbers are used for less divergent sequences.  
-
-The Blosum matrices are generally the most effective and widely used but see also PAM  (Point Accepted Mutation) matrices. 
-%For more information, see \url{http://www.ebi.ac.uk/help/matrix.html}.
-
-
-\begin{figure}[hbtp]
-\includegraphics[width=14cm]{figures/blosum45}
-\caption{The Blosum 45 score matrix.  The matrix is symmetric as $s(a,b) = s(b,a)$.  }
-\label{fig:blosum}
-\end{figure}
-
-
-
+%To model  the complex random process of genetic mutation and inheritance, we will need  tools from applied probability and statistics.  The next few sections are concerned with introducing the main tools and concepts that we will use for our study.  All of you will have previously encountered at least some of the ideas we discuss here  but, as with the linear algebra sections, it helps to review the main points before plunging in to new material.
 %
-%x = TTCATA and y = TGCTCGTA
-%gives 
-%\begin{verbatim}
-%T--TCATA
-%TGCTCGTA
+
+%\section{Alignment}
+%\label{sec:align}
+%\subsection{Homology}
+%
+%Homology (from the Greek, to agree) is a crucial concept in biology referring to traits or, in the case of sequences,  sequence regions  that share a common ancestry.  We expect homologous regions to be similar to each other where the level of similarity will depend on how recently they shared a common ancestor.
+%
+%Thus to say two regions are homologous is an evolutionary hypothesis.  Mrs Darwin (in Carol Ann Duffy's poem from the collection The World's Wife) was making an evolutionary hypothesis of homology:
+%
+%7 April 1852 \\
+%Went to the Zoo.\\
+%I said to Him --- \\
+%Something about that Chimpanzee over there reminds me of you.
+%
+%The claim does not imply that the regions share a similar function now or, depending on the time since divergence, that they  even particularly similar, just that they share a common ancestor.  Therefore, sequences are either homologous or not, there are no degrees of homology. We often infer homology between two sequences when they are similar but we must be careful as we can get similarity without homology.  Homologous sequences are sometimes referred to as {\em homologs}.
+%
+%There are two main ways that we get similarity without homology: either by chance or by convergent evolution.  Similarity by chance will occur even in completely random sequences on a finite alphabet.  In two random sequences of four letters, we would expect similarity by chance of 25\%.  
+%
+%Convergent evolution occurs when similar functions evolve independently of each other.  An example of this are the wings of birds and insects.  We don't believe these two very different creatures had a common ancestor that evolved wings but that wings evolved indecently of each other in the insect and bird lineages.  Thus, while wings in a fly and a sparrow may be superficially similar, they are not considered homologous.  The same applies to sequences that code for similar proteins (i.e., have similar function) but have evolved independently.  Such traits/regions are called analogous.
+%
+%We distinguish between two types of homology: orthology and paralogy:
+%\begin{description}
+%\item[Orthology] occurs when two genes are separated by a speciation event and evolve independently from there on.   
+%\item[Paralogy] occurs when a region of the genome is duplicated in the same genome (a duplication event) and they evolve in parallel in the same genome.  The two copies are said to be paralogs.
+%\end{description}
+%
+%
+%\subsection{Pairwise alignment}
+%
+%
+%
+%Given two sequences, if they are homologues, how do they align with each other?  That is, exactly which sites in the sequence are homologous with each other?  
+%
+%We consider pairs of sequences, $x$ and $y$ of length $m$ and $n$, respectively. $x_i$ is the $i$th symbol of $x$. These symbols are usually the 4 DNA or RNA bases or the 20 amino acids. We refer to the symbols as {\em  residues}.
+%
+%We will allow {\em gaps} to be introduced in either sequence to allow them to align better.   Biologically, gaps correspond to insertions or deletions in the sequence.
+%
+%Clearly, there are many ways of aligning a pair of sequences (how many?), but what is the best alignment?
+%
+%Example: x = GAATTC and y =  GATTA 
+%\begin{verbatim} 
+%GAATTC or GAATTC-
+%GA-TTA    -GATT-A
 %\end{verbatim}
+%are two possible alignments. \hfill $\square$
+%
+%\subsection{Scoring alignments}
+%
+%The best alignment will depend on how we score alignments.  It is easy to come up with different scoring regimes (e.g., score 1 for a match, -1 for a mismatch) but we really want to compare two models --- that the similarity we see is just chance vs. that the sequences are homologs. 
+%
+%We initially consider alignments without gaps.
 %
 %
-% How do we deal with gaps in the alignment?
- 
-\subsubsection{Scoring gaps}
-
-To make sequences align fully, we add gaps to one sequence or the other.  A gap in $x$ corresponds to an insertion in $y$ with respect to $x$ or a deletion in $x$ with respect to $y$.    Adding gaps comes with a penalty, so reduces the score for the match. 
-
-For a gap of length $k$, write  $\gamma(k)$ for the penalty.  We consider two forms for $\gamma$. 
-
-A {\em  linear penalty } is defined by $\gamma(k) = -dk $ for some $d > 0$.  That is, each deleted base adds a penalty of $d$.
-
- An {\em affine penalty} is defined by $\gamma(k)= -d-(k-1)e$ where $d>e>0$. $d$ is the gap open penalty and $e$ is the gap extension penalty.  The affine penalty is more biologically appropriate as insertions or deletions are typically created in a single event rather than building up one residue at a time. 
- 
- 
-More complex gap penalties can be used, for example, we may wish to have different penalties for gaps matched with different residues, or non-linear functions of gap length.   Such penalties come at the cost of more difficult implementation.
-
-In the algorithms below, we'll first consider the  simple case of  the linear penalty.
-
-
-\newpage
-
-
-\subsection{Global alignment: Needleman-Wunsch algorithm}
-
-We can't calculate all possible alignments of a pair of sequences. (There are ${n+m \choose m}$ possible  alignments for a pair of sequences of length $n$ and $m$.) We use {\em dynamic programming}  approaches that allow is to quickly calculate the best possible alignment (that is, the one that gives us the highest score).  
-
-Dynamic programming is technique of solving   complex problems by reducing them to a number of  much simpler subproblems that  we can easily solve then re-assemble to find the answer to the complex problem.  It uses the structure of the problem itself and so is only applicable to problems that possess a certain type of structure and to which we can apply the Principle of Optimality: ``a sub-optimal solution of a sub-problem cannot be part of optimal solution of original problem''.
-
-The the alignment context, the principle of optimality holds in that if we know the score of an  optimal alignment of length $k$ then the score of the first $k-1$ parts of the alignment must be optimal. 
-
-
-To see why this is, let  $F_{i,j}$ be the score of the optimal alignment between $x[1 : i]$ and $y[1 : j]$.  Let  $s(x_i,y_j)$ be the score for matching residue $x_i$ to residue $y_j$ and assume a linear gap penalty (so that the penalty for adding the gap $(x_i, -)$ or $(-,y_j)$ is $d$).  The optimal alignment up to $x_i,y_j$ either has $x_i$ and $y_j$ aligned, or $y_j$ aligned to a gap or $x_i$ aligned to a gap.  For example, it looks like
-\[
-%\begin{array}{ll l l l }
-%\mathtt{I G A y_j} & \mbox{ or } & \mathtt{I G A y_j }& \mbox{ or } & \mathtt{I G y_j -  } \\
-%\mathtt{L G V  x_i} & & \mathtt{L G x_i -} & & \mathtt{L G V  x_i}
-%\end{array}
-\mathtt{\begin{array}{ll l l }
-I & G & A & y_j \\
-L &G &V & x_i
-\end{array}} \mbox{ or }
-\mathtt{\begin{array}{ll l l }
-I & G & A & y_j \\
-V& x_i & - & - 
-\end{array}} \mbox{ or }
-\mathtt{\begin{array}{ll l l }
-G & A & y_j & -\\
-L &G &V & x_i
-\end{array}}
-\]
-In any case, the first part of the alignment must be optimal (If that first $k-1$ parts were not optimal, we'd find the optimal alignment for the first parts, add the $k$th bit on in one of the 3 possible ways and have a better alignment for the first $k$ parts, contradicting our assumption that our original alignment was optimal for length $k$).    Thus, if we know score of the best alignment for $k-1$ parts, we can extend it to the best alignment for $k$ parts.  This observation allows us to write the problem as a recurrence relation:
-\[ F(i,j)= \max 
-\begin{cases}
-F(i-1,j-1)+s(x_i,y_j), \\
-F(i-1,j)-d, \\
-F(i,j-1)-d.
-\end{cases} \]
-The first case we have matched $x_i,y_j$, the second case we have matched $x_i$ to a gap and the final case we have matched $y_j$ to a gap.
-
-So we want to find $F_{n,m}$ and we have the boundary conditions $F(0, 0) = 0$ (start at 0), $F (i, 0) = -id$ and $F (0, j) = -jd$ (linear gap penalties for initial gaps).
-
-Note that all the above can be phrased in terms of mismatches and penalties, rather than matches and scores. To do so, simply reverse the signs of the scores and take minimums rather than maximums.
-
-If we use a naive recursive method to calculate $F(n,m)$, we still get an exponential number of calls. But notice that there are only $m \times n$ possible combinations we need to calculate. We can do this in a tabular manner, calculating the matrix $F$ from the top left to the bottom right in a progressive fashion.
-
-To calculate the $(i,j)$th entry, we only need to know the 3 entries to the left and above it.  The $(i,j)$th entry s then a maximum over 3 numbers.  We keep a pointer to indicate which cell the $(i,j)$th entry was derived from.
-
-\begin{tikzpicture}
-\matrix (m) [matrix of nodes,column sep=10mm,row sep = 10 mm]
-{
-  $F(i-1,j-1)$ & $ F(i-1,j)$   \\
-  $F(i,j-1)$ & $ F(i,j) $  \\
-};
-% = \max\{F(i-1,j-1) + s(x_i,y_j),F(i-1,j)-d ,F(i,j-1)-d \}
-\draw[draw = red, <-] (m-2-2.north west) -- node[left] {$+s(x_i,y_j)$} (m-1-1.south east)  ;
-\draw[draw = red, <-] (m-2-2.north) -- node[right] {$-d$} (m-1-2.south) ;
-\draw[draw = red, <-] (m-2-2.west) --node[below] {$-d$} (m-2-1.east)  ;
-\end{tikzpicture}
-
-
-
-Once we have filled out the matrix, we trace back from  $F(n,m)$, following the path that led us here.   That is, the score at the $(n,m)$th position came from one of position  $(n-1,m)$, $(n,m-1)$, or $(n-1,m-1)$ by adding a gap or a match.  We move to whichever position it came from either adding the gap or the match in the process.  In doing so, we build up the alignment from right to left, eventually arriving at $F(0,0)$ at which point we can reverse the alignment to get the full 
-
-Our method is thus based on three things: a recurrence relation, tabular computing and then traceback.  These methods  turn an what is naively an exponential algorithm into a quadratic algorithm ($O(nm)$).
-
-%\begin{tabularx}{0.7\textwidth}{r|X|X|X|X|X|X|}
-%\multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{A} & \multicolumn{1}{c}{G} & \multicolumn{1}{c}{T} & \multicolumn{1}{c}{T} & \multicolumn{1}{c}{A}\tabularnewline
-%\cline{2-7} 
-% &  &&&&& \\ 
-%\cline{2-7} 
-%A &&&&&& \\ 
-%\cline{2-7} 
-%T &&&&&& \\ 
-%\cline{2-7} 
-%A &&&&&& \\ 
-%\cline{2-7} 
-%\end{tabularx}
+%%% DW: The following two sections (model of (non-)homologous sequences) use probability concepts that are not yet introduced. Makes sense to replace them with something less rigorous here and then come back to it later in course after the necessary probability has been discussed.
 %
-%\begin{tabularx}{0.7\textwidth}{c|X|X|X|X|X|X|}
-%\multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{A} & \multicolumn{1}{c}{G} & \multicolumn{1}{c}{T} & \multicolumn{1}{c}{T} & \multicolumn{1}{c}{A}\tabularnewline
-%\cline{2-7} 
-% & 0 & $\leftarrow$ -2 &-$\leftarrow$4 & $\leftarrow$-6 &$\leftarrow$-8 &$\leftarrow$-10  \\ 
-%\cline{2-7} 
-%A &$\uparrow$-2&2&0&-2&-4&-6 \\ 
-%\cline{2-7} 
-%T &$\uparrow$-4&0&0&2&0&-2 \\ 
-%\cline{2-7} 
-%A &$\uparrow$ -6&-2&-1&0&0&2 \\ 
-%\cline{2-7} 
-%\end{tabularx}
-
-{\bf Example:} Align {\tt x = ATA} and {\tt y = AGTTA } with the following scores: the purines  are A and G, while the pyrimidines are  C and T.  Let $s(a,b) = 2$ if $a = b$, 1 if $a$ is purine and $b$ is a purine or $a$ is a pyrimidine and  $b$ is a pyrimidine, and -2 if $a$ is a purine and $b$ is a pyrimidine or vice versa.  Let the gap score be $d = -2$.
-
-{\bf Solution:}
-Filling out the matrix and drawing arrows to show where each entry is derived from we get the following:
-
-\begin{tikzpicture}
-\matrix (m) [matrix of nodes,column sep=6mm,row sep = 5 mm]
-{
- &  & A & G & T & T & A  \\
-  &0&-2&-4&-6&-8& -10 \\
- A &-2&2&0&-2&-4&-6 \\
- T &-4&0&0&2&0&-2 \\
- A &-6&-2&1&0&0&2 \\
-};
-\draw[draw = red, ->] (m-3-3.north west) -- (m-2-2.south east);
-\draw[draw = red, ->] (m-3-4.west) -- (m-3-3.east);
-\draw[draw = red, ->] (m-3-5.west) -- (m-3-4.east);
-\draw[draw = red, ->] (m-3-6.west) -- (m-3-5.east);
-\draw[draw = red, ->] (m-3-7.west) -- (m-3-6.east);
-\draw[draw = red, ->] (m-3-7.north west) -- (m-2-6.south east);
-\draw[draw = red, ->] (m-4-3.north) -- (m-3-3.south);
-\draw[draw = red, ->] (m-4-4.north west) -- (m-3-3.south east);
-\draw[draw = red, ->] (m-4-5.north west) -- (m-3-4.south east);
-\draw[draw = red, ->] (m-4-6.north west) -- (m-3-5.south east);
-\draw[draw = red, ->] (m-4-6.west) -- (m-4-5.east);
-\draw[draw = red, ->] (m-4-7.west) -- (m-4-6.east);
-\draw[draw = red, ->] (m-5-3.north west) -- (m-4-2.south east);
-\draw[draw = red, ->] (m-5-3.north) -- (m-4-3.south);
-\draw[draw = red, ->] (m-5-4.north west) -- (m-4-3.south east);
-\draw[draw = red, ->] (m-5-5.north) -- (m-4-5.south);
-\draw[draw = red, ->] (m-5-6.north west) -- (m-4-5.south east);
-\draw[draw = red, ->] (m-5-7.north west) -- (m-4-6.south east);
-\foreach \x/\y in {3/2,4/3,5/4,6/5,7/6}{
-\draw[draw = red, ->] (m-2-\x.west) -- (m-2-\y.east);};
-\foreach \x/\y in {3/2,4/3,5/4}{
-\draw[draw = red, ->] (m-\x-2.north) -- (m-\y-2.south);};
-\end{tikzpicture}
-
-The score of the best alignment is given in the bottom right: $F(3,5) = 2$.  To find the alignment with the best score, we traceback from this point.  At $F(2,4)$ there are two choices that produce the same score.  One alignment, found by following the arrow from $F(2,4)$ to  $F(1,3)$ is
-\[\begin{array}{ccccc}
-A & - & - & T & A \\
-A & G & T & T & A
-\end{array}\]
-while the other is obtained by following the arrow from $F(2,4)$ to  $F(2,3)$ and looks like
-\[\begin{array}{ccccc}
-A & - & T & - & A \\
-A & G & T & T & A
-\end{array}\]
- \sqend
-% See slides from the lecture and try the applet availalbe in the online notes at \url{ http://www.fos.auckland.ac.nz/~biosci742/3_2.html}.
-
-
-
-\subsection{Elements of an alignment algorithm}
-
-
-
-We emphasise that these dynamic programming algorithms for sequence alignment are based on following elements:
-\begin{itemize}
-\item a recurrence relation for the quantity we are trying to optimise, including specification of the boundary conditions,
-\item  tabular computing to efficiently calculate the recurrence, and
-\item traceback (includes specifying rules for where to start and stop the traceback).
-\end{itemize}
-
-By altering the recurrence relation, the boundary conditions or the traceback, we will find different types of ``best'' alignment. Local alignment is  the most common form and is defined below.  
-
-
-\subsection{Local Alignment: Smith Waterman algorithm}
-
-The Needleman-Wunsch algorithm  looks only at completely aligning two sequences. More commonly, we want to find the best alignment for some subsequence of two sequences. This is the local alignment problem. 
-
-The resulting algorithm that solves this problem is very similar to the one that solve the  global alignment problem.  We derive it as follows.  Redefine $F(i,j)$ to be the score of the best suffix alignment of $x_1 x_2 \ldots x_i$ and $y_1 y_2 \ldots y_j$, where a {\em suffix alignment} is any alignment of $x_s x_{s+1} \ldots x_i$ and $y_r y_{r+1} \ldots y_i$ for some $ 1 \leq s \leq i$ and $1 \leq r \leq j$.  Note that this suffix alignment could be the empty alignment with score 0.
-
-We thus get the recursion 
-\[ F_{i,j}= \max 
-\begin{cases}
-0\\
-F(i-1,j-1)+s(x_i,y_i), \\
-F(i-1,j)-d, \\
-F(i,j-1)-d.
-\end{cases} \]
-So instead of a letting a score for an alignment to go negative, we start a new alignment. To find the best subsequence alignment, then, we simply look for the best score and trace it back until we hit a 0. Note than we can now start and finish anywhere in the matrix.
-
-{\bf Example:} Find the best local alignment using the score matrix and sequences given in the previous example: {\tt x = ATA} and {\tt y = AGTTA }
-
-{\bf Solution:}  Fill out the matrix, drawing an arrow when a cell has a predecessor to get the following.
-
-\begin{tikzpicture}
-\matrix (m) [matrix of nodes,column sep=6mm,row sep = 5 mm]
-{
- &  & A & G & T & T & A  \\
-  &0&0&0&0&0& 0 \\
- A &0&2&1&0&0&2 \\
- T &0&0&0&3&2&0 \\
- A &0&2&1&1&1&4 \\
-};
-\draw[draw = red, ->] (m-3-3.north west) -- (m-2-2.south east);
-\draw[draw = red, ->] (m-3-4.north west) -- (m-2-3.south east);
-\draw[draw = red, ->] (m-3-7.north west) -- (m-2-6.south east);
-\draw[draw = red, ->] (m-4-3.north) -- (m-3-3.south);
-\draw[draw = red, ->] (m-4-4.north west) -- (m-3-3.south east);
-\draw[draw = red, ->] (m-4-5.north west) -- (m-3-4.south east);
-\draw[draw = red, ->] (m-4-6.north west) -- (m-3-5.south east);
-\draw[draw = red, ->] (m-4-7.north) -- (m-3-7.south);
-\draw[draw = red, ->] (m-4-7.west) -- (m-4-6.east);
-\draw[draw = red, ->] (m-5-3.north west) -- (m-4-2.south east);
-\draw[draw = red, ->] (m-5-4.north west) -- (m-4-3.south east);
-\draw[draw = red, ->] (m-5-6.north west) -- (m-4-5.south east);
-\draw[draw = red, ->] (m-5-7.north west) -- (m-4-6.south east);
-\draw[draw = red, ->] (m-5-5.north) -- (m-4-5.south);
-\end{tikzpicture}
-
-The score of the highest scoring local alignment is the largest entry in this matrix.  We find this at $(5,3)$ where $F(5,3) = 4$.  The sub alignment is found by tracing back from that cell and stopping at the first cell with no predecessor (or at the first 0 encountered).  This produces the local alignment 
-
-\( \begin{array}{cc}
-T & A \\
-T & A
-\end{array}\)
- \sqend
-
-
-
-%\subsection{Variations on a theme}
-
-
-
-
-%\subsubsection{Repeated matches}
+%\subsubsection{Model of non-homologous  sequences}
 %
-%In the repeated matches problem, we suppose there is a repeated domain or motif (described by sequence $y$) in a sequence $x$ and we wish to find copies of these repeats. We assume that the score for a match needs to be at least $T > 0$ to ensure spurious matches will not be included. The boundary condition is $F (0, 0) = 0$ and the recurrence is
-%\[ F_{i,0}= \max 
+%%The most basic model is that each letter appears with some probability, letter $a$ appears with probability $q_a$ (note that the probabilities summed over the alphabet are 1), that each site is independent and that the each sequence is independent. Then the probability of seeing sequence $x$ is
+%%\[ P(x) = \prod_{i = 1}^n q_{x_i} \]
+%%and the joint likelihood of an alignment is just the joint probability of the sequences $x$
+%%and $y$,
+%%\[ P(x,y) = P(x)P(y) = \prod_{i = 1}^n q_{x_i} \prod_{i = 1}^m q_{y_i} = \prod_{i = 1}^n q_{x_i}q_{y_i}.  \]
+%
+%
+%
+%
+%\subsubsection{Model  of homologous  sequences}
+%
+%
+%%An alternative model is that the two sequences are related and the probability of seeing
+%%the pair of residues $a$ (from $x$) and $b$ (from $y$) aligned at a locus is $p_{ab}$. The probability of the alignment is then the product of the loci,
+%%\[ P(x,y) = \prod_{i = 1}^n p_{x_iy_i}. \]
+%%
+%%
+%%To compare these two models, we take ratio of these likelihoods:
+%%\[ \frac{\prod_{i=1}^n p_{x_iy_i}}{ \prod_{i = 1}^n q_{x_i}q_{y_i}} = \prod_{i = 1}^n \frac{ p_{x_iy_i}}{q_{x_i}q_{y_i}}. \]
+%%It is easier to work with log-likelihoods (and addition) than likelihoods and multiplica- tion, so we take the log of this quantity to get
+%%\[ S= \sum_i s(x_,y_i) \]
+%%where
+%%\[ s(a,b) = \log\left(\frac{p_{ab}}{q_aq_b}\right).\]
+%%The score of the alignment then is the sum over the local score $s(a, b)$. $s$ can be thought of as a matrix and is often referred to as a {\em score matrix } or {\em substitution matrix}. 
+%%
+%%
+%%There are various methods for deciding reasonable values for the entries of the matrix, discussed below.
+%%Note that even when ad hoc values are chosen for the matrix, the underlying probabilities, $p_{ab}$ and $q_a$ can be derived by reversing the above argument.  That is, when a score matrix is selected we are making implicit assumptions about the $q_a$s and $p_{ab}$s.
+%
+%Example: If x = GAATTC and y =  GGATTA are aligned as 
+%\begin{verbatim} 
+%GAATTC
+%GGATTA
+%\end{verbatim}
+%where $s(a,b) = 2$  if $a = b$ and $s(a,b) = -1$ if $a \neq b$, the alignments scores $2-1+2+2+2-1 = 6$. \hfill $\square$
+%
+%
+%
+%\subsection{Choosing the substitution matrix}
+%
+%For protein sequences, the quantities $p_{ab}$ and $q_a$ have been empirically estimated to produce score matrices.  In particular, the  BLOSUM (BLocks SUbstitution Matrix) matrix of which there are various types, e.g. Blosum 45 and Blosum 80.
+%
+%These matrices were calculated by studying a large number of confirmed alignments where there was considerable agreement between the sequences. The relative frequency of residues was calculated (to estimates for  the $q_a$s.) and the relative frequencies of pairs of residues was calculated  (to give estimates for  the $p_{ab}$s). The relative frequencies were then scaled to give integer entries in the matrix.  The number after the matrix represents the similarity of the sequences used to estimate the matrix, so matrices with higher numbers are used for less divergent sequences.  
+%
+%The Blosum matrices are generally the most effective and widely used but see also PAM  (Point Accepted Mutation) matrices. 
+%%For more information, see \url{http://www.ebi.ac.uk/help/matrix.html}.
+%
+%
+%\begin{figure}[hbtp]
+%\includegraphics[width=14cm]{figures/blosum45}
+%\caption{The Blosum 45 score matrix.  The matrix is symmetric as $s(a,b) = s(b,a)$.  }
+%\label{fig:blosum}
+%\end{figure}
+%
+%
+%
+%%
+%%x = TTCATA and y = TGCTCGTA
+%%gives 
+%%\begin{verbatim}
+%%T--TCATA
+%%TGCTCGTA
+%%\end{verbatim}
+%%
+%%
+%% How do we deal with gaps in the alignment?
+% 
+%\subsubsection{Scoring gaps}
+%
+%To make sequences align fully, we add gaps to one sequence or the other.  A gap in $x$ corresponds to an insertion in $y$ with respect to $x$ or a deletion in $x$ with respect to $y$.    Adding gaps comes with a penalty, so reduces the score for the match. 
+%
+%For a gap of length $k$, write  $\gamma(k)$ for the penalty.  We consider two forms for $\gamma$. 
+%
+%A {\em  linear penalty } is defined by $\gamma(k) = -dk $ for some $d > 0$.  That is, each deleted base adds a penalty of $d$.
+%
+% An {\em affine penalty} is defined by $\gamma(k)= -d-(k-1)e$ where $d>e>0$. $d$ is the gap open penalty and $e$ is the gap extension penalty.  The affine penalty is more biologically appropriate as insertions or deletions are typically created in a single event rather than building up one residue at a time. 
+% 
+% 
+%More complex gap penalties can be used, for example, we may wish to have different penalties for gaps matched with different residues, or non-linear functions of gap length.   Such penalties come at the cost of more difficult implementation.
+%
+%In the algorithms below, we'll first consider the  simple case of  the linear penalty.
+%
+%
+%\newpage
+%
+%
+%\subsection{Global alignment: Needleman-Wunsch algorithm}
+%
+%We can't calculate all possible alignments of a pair of sequences. (There are ${n+m \choose m}$ possible  alignments for a pair of sequences of length $n$ and $m$.) We use {\em dynamic programming}  approaches that allow is to quickly calculate the best possible alignment (that is, the one that gives us the highest score).  
+%
+%Dynamic programming is technique of solving   complex problems by reducing them to a number of  much simpler subproblems that  we can easily solve then re-assemble to find the answer to the complex problem.  It uses the structure of the problem itself and so is only applicable to problems that possess a certain type of structure and to which we can apply the Principle of Optimality: ``a sub-optimal solution of a sub-problem cannot be part of optimal solution of original problem''.
+%
+%The the alignment context, the principle of optimality holds in that if we know the score of an  optimal alignment of length $k$ then the score of the first $k-1$ parts of the alignment must be optimal. 
+%
+%
+%To see why this is, let  $F_{i,j}$ be the score of the optimal alignment between $x[1 : i]$ and $y[1 : j]$.  Let  $s(x_i,y_j)$ be the score for matching residue $x_i$ to residue $y_j$ and assume a linear gap penalty (so that the penalty for adding the gap $(x_i, -)$ or $(-,y_j)$ is $d$).  The optimal alignment up to $x_i,y_j$ either has $x_i$ and $y_j$ aligned, or $y_j$ aligned to a gap or $x_i$ aligned to a gap.  For example, it looks like
+%\[
+%%\begin{array}{ll l l l }
+%%\mathtt{I G A y_j} & \mbox{ or } & \mathtt{I G A y_j }& \mbox{ or } & \mathtt{I G y_j -  } \\
+%%\mathtt{L G V  x_i} & & \mathtt{L G x_i -} & & \mathtt{L G V  x_i}
+%%\end{array}
+%\mathtt{\begin{array}{ll l l }
+%I & G & A & y_j \\
+%L &G &V & x_i
+%\end{array}} \mbox{ or }
+%\mathtt{\begin{array}{ll l l }
+%I & G & A & y_j \\
+%V& x_i & - & - 
+%\end{array}} \mbox{ or }
+%\mathtt{\begin{array}{ll l l }
+%G & A & y_j & -\\
+%L &G &V & x_i
+%\end{array}}
+%\]
+%In any case, the first part of the alignment must be optimal (If that first $k-1$ parts were not optimal, we'd find the optimal alignment for the first parts, add the $k$th bit on in one of the 3 possible ways and have a better alignment for the first $k$ parts, contradicting our assumption that our original alignment was optimal for length $k$).    Thus, if we know score of the best alignment for $k-1$ parts, we can extend it to the best alignment for $k$ parts.  This observation allows us to write the problem as a recurrence relation:
+%\[ F(i,j)= \max 
 %\begin{cases}
-%F(i-1,0),\\
-%F(i-1,j)-T, \, j = 1,\ldots,m;
+%F(i-1,j-1)+s(x_i,y_j), \\
+%F(i-1,j)-d, \\
+%F(i,j-1)-d.
 %\end{cases} \]
+%The first case we have matched $x_i,y_j$, the second case we have matched $x_i$ to a gap and the final case we have matched $y_j$ to a gap.
 %
+%So we want to find $F_{n,m}$ and we have the boundary conditions $F(0, 0) = 0$ (start at 0), $F (i, 0) = -id$ and $F (0, j) = -jd$ (linear gap penalties for initial gaps).
+%
+%Note that all the above can be phrased in terms of mismatches and penalties, rather than matches and scores. To do so, simply reverse the signs of the scores and take minimums rather than maximums.
+%
+%If we use a naive recursive method to calculate $F(n,m)$, we still get an exponential number of calls. But notice that there are only $m \times n$ possible combinations we need to calculate. We can do this in a tabular manner, calculating the matrix $F$ from the top left to the bottom right in a progressive fashion.
+%
+%To calculate the $(i,j)$th entry, we only need to know the 3 entries to the left and above it.  The $(i,j)$th entry s then a maximum over 3 numbers.  We keep a pointer to indicate which cell the $(i,j)$th entry was derived from.
+%
+%\begin{tikzpicture}
+%\matrix (m) [matrix of nodes,column sep=10mm,row sep = 10 mm]
+%{
+%  $F(i-1,j-1)$ & $ F(i-1,j)$   \\
+%  $F(i,j-1)$ & $ F(i,j) $  \\
+%};
+%% = \max\{F(i-1,j-1) + s(x_i,y_j),F(i-1,j)-d ,F(i,j-1)-d \}
+%\draw[draw = red, <-] (m-2-2.north west) -- node[left] {$+s(x_i,y_j)$} (m-1-1.south east)  ;
+%\draw[draw = red, <-] (m-2-2.north) -- node[right] {$-d$} (m-1-2.south) ;
+%\draw[draw = red, <-] (m-2-2.west) --node[below] {$-d$} (m-2-1.east)  ;
+%\end{tikzpicture}
+%
+%
+%
+%Once we have filled out the matrix, we trace back from  $F(n,m)$, following the path that led us here.   That is, the score at the $(n,m)$th position came from one of position  $(n-1,m)$, $(n,m-1)$, or $(n-1,m-1)$ by adding a gap or a match.  We move to whichever position it came from either adding the gap or the match in the process.  In doing so, we build up the alignment from right to left, eventually arriving at $F(0,0)$ at which point we can reverse the alignment to get the full 
+%
+%Our method is thus based on three things: a recurrence relation, tabular computing and then traceback.  These methods  turn an what is naively an exponential algorithm into a quadratic algorithm ($O(nm)$).
+%
+%%\begin{tabularx}{0.7\textwidth}{r|X|X|X|X|X|X|}
+%%\multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{A} & \multicolumn{1}{c}{G} & \multicolumn{1}{c}{T} & \multicolumn{1}{c}{T} & \multicolumn{1}{c}{A}\tabularnewline
+%%\cline{2-7} 
+%% &  &&&&& \\ 
+%%\cline{2-7} 
+%%A &&&&&& \\ 
+%%\cline{2-7} 
+%%T &&&&&& \\ 
+%%\cline{2-7} 
+%%A &&&&&& \\ 
+%%\cline{2-7} 
+%%\end{tabularx}
+%%
+%%\begin{tabularx}{0.7\textwidth}{c|X|X|X|X|X|X|}
+%%\multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{A} & \multicolumn{1}{c}{G} & \multicolumn{1}{c}{T} & \multicolumn{1}{c}{T} & \multicolumn{1}{c}{A}\tabularnewline
+%%\cline{2-7} 
+%% & 0 & $\leftarrow$ -2 &-$\leftarrow$4 & $\leftarrow$-6 &$\leftarrow$-8 &$\leftarrow$-10  \\ 
+%%\cline{2-7} 
+%%A &$\uparrow$-2&2&0&-2&-4&-6 \\ 
+%%\cline{2-7} 
+%%T &$\uparrow$-4&0&0&2&0&-2 \\ 
+%%\cline{2-7} 
+%%A &$\uparrow$ -6&-2&-1&0&0&2 \\ 
+%%\cline{2-7} 
+%%\end{tabularx}
+%
+%{\bf Example:} Align {\tt x = ATA} and {\tt y = AGTTA } with the following scores: the purines  are A and G, while the pyrimidines are  C and T.  Let $s(a,b) = 2$ if $a = b$, 1 if $a$ is purine and $b$ is a purine or $a$ is a pyrimidine and  $b$ is a pyrimidine, and -2 if $a$ is a purine and $b$ is a pyrimidine or vice versa.  Let the gap score be $d = -2$.
+%
+%{\bf Solution:}
+%Filling out the matrix and drawing arrows to show where each entry is derived from we get the following:
+%
+%\begin{tikzpicture}
+%\matrix (m) [matrix of nodes,column sep=6mm,row sep = 5 mm]
+%{
+% &  & A & G & T & T & A  \\
+%  &0&-2&-4&-6&-8& -10 \\
+% A &-2&2&0&-2&-4&-6 \\
+% T &-4&0&0&2&0&-2 \\
+% A &-6&-2&1&0&0&2 \\
+%};
+%\draw[draw = red, ->] (m-3-3.north west) -- (m-2-2.south east);
+%\draw[draw = red, ->] (m-3-4.west) -- (m-3-3.east);
+%\draw[draw = red, ->] (m-3-5.west) -- (m-3-4.east);
+%\draw[draw = red, ->] (m-3-6.west) -- (m-3-5.east);
+%\draw[draw = red, ->] (m-3-7.west) -- (m-3-6.east);
+%\draw[draw = red, ->] (m-3-7.north west) -- (m-2-6.south east);
+%\draw[draw = red, ->] (m-4-3.north) -- (m-3-3.south);
+%\draw[draw = red, ->] (m-4-4.north west) -- (m-3-3.south east);
+%\draw[draw = red, ->] (m-4-5.north west) -- (m-3-4.south east);
+%\draw[draw = red, ->] (m-4-6.north west) -- (m-3-5.south east);
+%\draw[draw = red, ->] (m-4-6.west) -- (m-4-5.east);
+%\draw[draw = red, ->] (m-4-7.west) -- (m-4-6.east);
+%\draw[draw = red, ->] (m-5-3.north west) -- (m-4-2.south east);
+%\draw[draw = red, ->] (m-5-3.north) -- (m-4-3.south);
+%\draw[draw = red, ->] (m-5-4.north west) -- (m-4-3.south east);
+%\draw[draw = red, ->] (m-5-5.north) -- (m-4-5.south);
+%\draw[draw = red, ->] (m-5-6.north west) -- (m-4-5.south east);
+%\draw[draw = red, ->] (m-5-7.north west) -- (m-4-6.south east);
+%\foreach \x/\y in {3/2,4/3,5/4,6/5,7/6}{
+%\draw[draw = red, ->] (m-2-\x.west) -- (m-2-\y.east);};
+%\foreach \x/\y in {3/2,4/3,5/4}{
+%\draw[draw = red, ->] (m-\x-2.north) -- (m-\y-2.south);};
+%\end{tikzpicture}
+%
+%The score of the best alignment is given in the bottom right: $F(3,5) = 2$.  To find the alignment with the best score, we traceback from this point.  At $F(2,4)$ there are two choices that produce the same score.  One alignment, found by following the arrow from $F(2,4)$ to  $F(1,3)$ is
+%\[\begin{array}{ccccc}
+%A & - & - & T & A \\
+%A & G & T & T & A
+%\end{array}\]
+%while the other is obtained by following the arrow from $F(2,4)$ to  $F(2,3)$ and looks like
+%\[\begin{array}{ccccc}
+%A & - & T & - & A \\
+%A & G & T & T & A
+%\end{array}\]
+% \sqend
+%% See slides from the lecture and try the applet availalbe in the online notes at \url{ http://www.fos.auckland.ac.nz/~biosci742/3_2.html}.
+%
+%
+%
+%\subsection{Elements of an alignment algorithm}
+%
+%
+%
+%We emphasise that these dynamic programming algorithms for sequence alignment are based on following elements:
+%\begin{itemize}
+%\item a recurrence relation for the quantity we are trying to optimise, including specification of the boundary conditions,
+%\item  tabular computing to efficiently calculate the recurrence, and
+%\item traceback (includes specifying rules for where to start and stop the traceback).
+%\end{itemize}
+%
+%By altering the recurrence relation, the boundary conditions or the traceback, we will find different types of ``best'' alignment. Local alignment is  the most common form and is defined below.  
+%
+%
+%\subsection{Local Alignment: Smith Waterman algorithm}
+%
+%The Needleman-Wunsch algorithm  looks only at completely aligning two sequences. More commonly, we want to find the best alignment for some subsequence of two sequences. This is the local alignment problem. 
+%
+%The resulting algorithm that solves this problem is very similar to the one that solve the  global alignment problem.  We derive it as follows.  Redefine $F(i,j)$ to be the score of the best suffix alignment of $x_1 x_2 \ldots x_i$ and $y_1 y_2 \ldots y_j$, where a {\em suffix alignment} is any alignment of $x_s x_{s+1} \ldots x_i$ and $y_r y_{r+1} \ldots y_i$ for some $ 1 \leq s \leq i$ and $1 \leq r \leq j$.  Note that this suffix alignment could be the empty alignment with score 0.
+%
+%We thus get the recursion 
 %\[ F_{i,j}= \max 
 %\begin{cases}
-%F(i,0),\\
+%0\\
 %F(i-1,j-1)+s(x_i,y_i), \\
 %F(i-1,j)-d, \\
 %F(i,j-1)-d.
 %\end{cases} \]
-%Start the traceback at the additional cell, $F (n + 1, 0)$ (calculated using the rule for $F (i, 0)$).
-
-\subsubsection{Overlap matches}
-
-As an example of how easy it is to establish different types of alignment algorithm we consider a special type of alignment known as an overlap alignment.  
-
-
-When we expect one sequence to completely contain another or that they overlap, we want a global type alignment that does not penalize the unmatched overhanging ends. The boundary conditions are $F (i, 0) = F (0, j) = 0$ for all $i, j$, the recurrence relation is just the global recurrence and we start the traceback at the position on the right  or top boundary the maximum score taken over all scores on those boundaries is achieved, $F (i, m)$ or $F (n, j)$. The traceback stops when either the left or top border  is reached, $F (i, 0)$ or $F (0, j)$.
-
-
-\subsection{Pairwise alignment with non-linear gap penalties }
-
-In our pairwise alignment discussion, we only considered linear gap penalties.  As we noted earlier, linear penalties are a poor model for biological sequence data where we expect gaps (that is, insertions or deletions) to be quite rare but if there is a gap it may be multiple  bases in length.  Thus, an affine penalty, which penalises the start of the gap more heavily than any extension to the gap is favoured.
-
-For an arbitrary  gap penalty,  $\gamma(k)$, we can continue to use a similar dynamic programming approach as before, but a direct adoption of that approach results in a much slower algorithm. Let's investigate: With a general gap penalty, $\gamma(k)$, the recurrence relation becomes 
-\[ F_{i,j}= \max 
-\begin{cases}
-F(i-1,j-1)+s(x_i,y_j), \\
-F(k,j) + \gamma(i - k), \hspace{1cm} k = 0,\ldots,i-1,  \\
-F(i,k) + \gamma(j-k),\hspace{1cm} k = 0,\ldots,j-1  .
-\end{cases} \]
-This means that to calculate the value of each cell in the matrix $F(i,j)$ we need to consider $i+j+1$ other cells --- the $i$ previous cells in the row, the $j$ previous cells in the column, and the one adjacent diagonal cell --- rather than the 3 as we had with the linear gap penalty (see Figure below).  This results in a $O(n^3)$ algorithm rather than a $O(n^2)$
-
-To calculate an unknown cell of $F$, the scores for gaps of all possible lengths need to be calculated meaning that a calculation for each previous cell in the row and column needs to be made: \\
-\begin{tikzpicture}
-\matrix (m) [matrix of nodes,column sep=3mm,row sep = 3 mm, style={nodes={rectangle,draw,minimum width=4em}}]
-{
- &  & A & G & T & T & A  \\
-  &0&-2&-4&-6&-8& -10 \\
- A &-2&2&0&-2&-4&-6 \\
- T &-4&0&0&? & & \\
- A & & & & & &   \\
-};
-\draw[draw = red, <-] (m-4-5.south) to [bend left = 15] (m-4-4.south east);
-\draw[draw = red, <-] (m-4-5.south) to [bend left = 30] (m-4-3.south east);
-\draw[draw = red, <-] (m-4-5.south) to [bend left = 45] (m-4-2.south east);
-\draw[draw = red, <-] (m-4-5.east) to [bend right = 25] (m-3-5.south east);
-\draw[draw = red, <-] (m-4-5.east) to [bend right = 35] (m-2-5.south east);
-\draw[draw = red, <-] (m-4-5.north west) to (m-3-4.south east);
-\end{tikzpicture}
-
-
-\subsection{Alignment with affine gap scores}
-
-
-In the case of an affine gap score (which has the form $\gamma(k) = -d - (k-1)e$\,) it turns out that we can, once again, construct a $O(n^2)$ dynamic programming algorithm to solve the alignment problem.
-The only difficulty is that we now have to keep track of 3 possible states corresponding to 3 cases:
-\begin{enumerate}
-\item Let $M(i,j)$ be the best score of the alignment up to $(i,j)$ given that $x_i$ is aligned to $y_j$. This case looks like\\
-{\tt A C C $\mathtt{x_i}$ \\
-A C G $\mathtt{y_j}$}
-\item Let $I_x(i,j)$ be the best score of the alignment up to $(i,j)$ given that $x_i$ is aligned to a gap. This case looks like\\
-{\tt A C C $\mathtt{x_i}$ \\
-  G $\mathtt{y_j}$   - -}
-\item Let $I_y(i,j)$ be the best score of the alignment up to $(i,j)$ given that $y_j$ is aligned to a gap. This case looks like\\
-{\tt  C C $\mathtt{x_i}$  - \\ 
-A C G  $\mathtt{y_j}$ }
-\end{enumerate}
-Given those definitions, and assuming that a gap cannot directly follow an insertion (that is, we can't go directly from $I_x$ to $I_y$ or vice versa), we have the following recurrence relations:
-\[ M(i,j)= \max 
-\begin{cases}
-M(i-1,j-1)+s(x_i,y_j), \\
-I_x(i-1,j-1)+s(x_i,y_j), \\
-I_y(i-1,j-1)+s(x_i,y_j); 
-\end{cases} \]
-\[ I_x(i,j)= \max 
-\begin{cases}
-M(i-1,j)-d, \\
-I_x(i-1,j)-e; 
-\end{cases} \mbox{and}, \]
-\[ I_y(i,j)= \max 
-\begin{cases}
-M(i,j-1)-d, \\
-I_y(i,j-1)-e. 
-\end{cases} \]
-It should be clear that we can calculate this recursion efficiently using tabular computation where we have 3 arrays: one for each of $M$, $I_x$ and $I_y$.  We can use a similar back-tracking mechanism to find the best alignment once we have calculated the scores.  
-
-This results in an quadratic time and space algorithm once again but the coefficient of the quadratic term is greater for this algorithm than the linear gap penalty one.  For example, the space requirement here is $3n^2$ while it is only $n^2$ with a linear gap penalty.  
-
-The above recursions can be very neatly represented as a {\em finite state automaton}, or FSA.  
-
-\begin{figure}[ht]
-\centering
-\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=4cm,
-                    semithick,every text node part/.style={align=center}]
-  \tikzstyle{every state}=[fill=none,draw=black,text=black]
-
-  \node[state] (M)                    {$ M$\\$ (+1,+1)$};
-  \node[state]         (Ix) [above right of=M] {$I_x$\\$(+1,0)$};
-  \node[state]         (Iy) [below right of=M]       {$I_y$\\$ (0,+1)$};
-
-  \path (M) edge       [bend left]        node {$-d$} (Ix)
-          (M) edge [loop left] node {$s(x_i,y_j)$} (M)
-          (Ix) edge       [bend left]        node {$s(x_i,y_j)$} (M)
-          (Ix) edge [loop right] node {$-e$} (Ix)
-          (Iy) edge       [bend left]        node {$s(x_i,y_j)$} (M)
-          (Iy) edge [loop right] node {$-e$} (Iy)
-          (M) edge [bend left] node {$-d$} (Iy);
- \end{tikzpicture}
-\caption{A finite state automaton describing the affine gap alignment recurrence relation. The pairs of numbers below the state names indicate how we  increment the position in sequence $x$ and $y$. }
- \label{fig:fsa}
- \end{figure}
- 
- 
- In an FSA, each of the three possibilities, match, insertion in $x$ or insertion in $y$, corresponds to a state (drawn as circles).  
- 
- The transitions each carry a score, as indicated next to the arrow.
- 
- The new value for the state variable at $(i,j)$ is the maximum of the scores corresponding to the transitions coming into the state.  Each transition score is given by is given by the value of the source state at the offsets specified by the $\delta (i,j)$ pair of the target state plus the specified score increment.
- 
- An alignment corresponds to a path through the states.
- 
- \begin{verbatim}
-V  L  S  P  A  D  -  K
-H  L  -  -  A  E  S  K
-
-m  m  Ix Ix m  m  Iy m
-\end{verbatim}
-
- 
- These automata are known in computer science as Moore machines.
- 
- We've already seen one type of FSA: a Markov chain can be represented as a stochastic FSA.  We'll look at another stochastic FSA, the hidden Markov model or HMM, shortly.
-
-\subsection{Linear space alignment}
-
-If sequences are large, even a quadratic algorithm can be difficult to work with.  We can't improve the speed of the algorithm but we can reduce the amount of memory we need (currently at that is $O(n^2)$ too).
-
-If all we require is the {\em score} of the best alignment, we immediately see that we don't need to keep the whole matrix until the end of the alignment.  In the case of global alignment, the score of the best alignment is given by the entry $F(m,n)$.  To calculate any score in the $i$th row, all we need to know is the $(i-1)$th row, so we only need to keep the a single row of the matrix in memory.  A similar argument can be made for the score of the best local alignment.
-
-If we actually want the best alignment, it turns out that we can still produce a linear space algorithm.  We employ  a {\em divide and conquer} approach.  Suppose we could find a cell, $(i^\ast,j^\ast)$ what we knew to lie on the optimal alignment.  Then we could divide the alignment problem into two halves: from $(0,0)$ to $(i^\ast,j^\ast)$ then from $(i^\ast,j^\ast)$ to $(m,n)$.  In the best case, this reduces the amount of storage space require by 2.  This process can be iterated, so  $(i^{\ast \ast},j^{\ast \ast})$ is found to reduce the space required for the $(0,0)$ to $(i^\ast,j^\ast)$ section and so on.   It turns out that given an $i^\ast$, a suitable $j^\ast$ can be found.   We omit the details here (they are not too difficult) but  details and references are given towards the end of chapter 2 in the Durbin et al book.
-
-
-\section{Multiple sequence alignments (MSA)}
-
-In pairwise alignment, we were given two sequences, $x$ and $y$ and wanted to align them by judiciously inserting gaps so that homologous residues were lined up with one another.  
-
-Multiple alignment is similar except now we have $k \geq 3$ sequences to align, so we want to form columns of homologous residues by adding gaps to each sequence.  
-
-Experts can construct multiple alignments by hand by considering a number of factors like secondary and tertiary protein structure, highly conserved regions, patterns of gaps, evolutionary processes etc.    This is, however, subjective, difficult and tedious. 
-
-We want to come up with a method that is probabilistic, automatic and produces alignments that experts are happy with.
-
-A good entry point to understanding the problem of global alignment is the {\tt Phylo} puzzle game at \url{http://phylo.cs.mcgill.ca/} where you work on short multiple alignments by hand. 
-
-
-
-%\subsubsection{Resources}
+%So instead of a letting a score for an alignment to go negative, we start a new alignment. To find the best subsequence alignment, then, we simply look for the best score and trace it back until we hit a 0. Note than we can now start and finish anywhere in the matrix.
 %
-%Read chapter 6 of the Durbin et al book.
+%{\bf Example:} Find the best local alignment using the score matrix and sequences given in the previous example: {\tt x = ATA} and {\tt y = AGTTA }
 %
-%An online lecture from BioSci742 covers much of this material: \url{http://www.fos.auckland.ac.nz/~biosci742/3_6.html}.  In particular, check out the applet showing how progressive MSA is performed: \url{http://www.fos.auckland.ac.nz/~biosci742/applets/multseqalign.html}.
+%{\bf Solution:}  Fill out the matrix, drawing an arrow when a cell has a predecessor to get the following.
 %
-%The Clustal$\Omega$ website: \url{http://www.clustal.org/omega/} and paper: \url{http://www.nature.com/msb/journal/v7/n1/full/msb201175.html}. 
-
-\subsection{Dynamic programming}
-
-It is tempting to try to extend the dynamic programming methods that we used for pairwise alignments to the MSA problem.  It is relatively easy to write down the naive extension of pairwise alignment algorithms to more than 2 sequences. But the naive implementation quickly becomes impossible as the number of sequences and the length of the sequences increases.  
-
-For example, for 2 sequences of length $L$, the Needleman-Wunsch algorithm requires a 2-dimensional array with $L^2$ cells in total to be stored in memory.  The MSA analogue on $n$ sequences  requires storing an $n$-dimensional array containing  $L^n$ cells in total.  Even for short sequences of $L = 100$, we would require memory for $100^5 = 10^{10}$ cells (at 4 bytes per cell, that's about 37 GB).  
-
-Some clever work from Lipman, Altschul and Kececioglu (the first two co-wrote BLAST) managed to reduce the size of the space that needs to be considered.  That is, instead of calculating all $L^n$ cells, they calculate upper and lower bounds on the score of the best MSA and then need only calculate the cells in the $n$-dimensional array that will produce scores lying between these two bounds.   This work allows a few sequences (5-10) of moderate length (300 residues) and not too far diverged to be optimally aligned but even this requires a large computational resource.
-
-
-\subsection{Progressive alignment}
-
-Finding the optimal MSA is computationally  prohibitive, as discussed in the previous Section.  Typically, we resort to finding a good-enough alignment using heuristic techniques.  The most widely used heuristic is progressive alignment.  
-
-Progressive alignment involves a series of successive pairwise alignments.  At it's most basic, an initial pair of sequences are chosen and aligned, a third is chosen and aligned to the first two and so on until all sequences are included in the MSA.  Other methods also allow the aligning of two alignments to each other.  For example, if there are 4 sequences, two pairs may be aligned first then the two alignments aligned to complete the MSA. 
-
-These methods require that we can: decide on an order in which to align the sequences, align two sequences together, align a sequences to a MSA and align two MSAs together.  
-
-The typical way to decide on the order in which to align the sequences is to build a guide tree, using a clustering methods such as UPGMA, and align sequences in the order that nodes occur from the leaves to the root of the tree. 
-  
-\subsection{Building trees with distances and UPGMA} \label{sec:UPGMA}
-
-%The fastest ways of constructing trees rely on defining a distance between sequences.  There are numerous ways of defining distances between sequences.  The simplest, for an aligned pair of sequences $x$ and $y$ of length $L$ is to count the number of positions where they differ, $D_{xy}$ say, and define the distance to be  $f_{xy} = D_{xy}/L$, that is, the fraction of sites at which they differ.  This method works well for  related sequences where $f$ is expected to be small, but doesn't grow as much as we would like as sequences become less and less related since even unrelated sequences share many bases in common due to chance.
-
-%The Jukes-Cantor distance is based on the simplest model of sequence evolution where mutations between all four bases are equally likely.  The distance is defined by $d_{xy} = -\frac34 \log {(1- \frac{4f_{xy}}3)}$. The Jukes-Cantor distance tends to infinity as the fraction of shared residues tends to the expected background level for unrelated sequences.
-
-UPGMA is a method of building trees based on distances: we are given a set of objects, and for each pair of objects we have some measure of the distance between them.  
-
-UPGMA stands for unweighted pair group method using arithmetic averages and is a simple method with an ugly name.  The idea can be thought of as a clustering algorithm where we start with all individual sequences  and start clustering them together, building the tree up from the leaves to the root.  The height of the internal nodes (or, equivalently, the edge lengths) is determined by the distances between the two clusters being joined.  
-
-For two sequences, $x$ and $y$, we assume we have a method of defining the distance $d_{xy}$.  We define the distance between two clusters of sequences, $C_i$ and $C_j$ as the average distance between all pairs between clusters:
-\[ d_{ij} = \frac1{|C_i| |C_j|}\sum_{x \in C_i,y \in C_j} d_{xy}\]
-where $|C|$ is the number of sequences in cluster $C$.
-
-We define the algorithm as follows:
-\begin{description}
-\item[Initialise]  Assign each sequence $i$ to it's own cluster $C_i$. Assign a leaf node to each cluster and give it height 0.
-\item[Repeat until there only one cluster remains]  Find clusters $C_i$ and $C_j$ such that $d_{ij}$ is minimal (choose randomly between equidistant candidates). 
-
-Join $i$ and $j$ to make the new cluster $C_k = C_i \cup C_j$.
-
-Define a node $k$ in the tree placed at height $d_{ij}/2$ with child nodes $i$ and $j$.
-
-Update the distance matrix.
-\end{description}
-
-This procedure results in a well-defined tree (we need to check that all node heights are above the heights of the their children).  The algorithm is quadratic ($O(n^2)$) in the number of sequences.
-
-
-{\bf Example:} Given 4 sequences, $A,B,C$ and $D$, which have the pairwise distances given by the distance matrix $d$ below, construct the UPGMA tree.
-\[ d= \begin{array}{ccccc}
-& A& B&C&D \\
-A &-&4 & 8 & 8 \\
-B & & - & 8 & 8 \\
-C & & & - & 6 \\
-D &&&& -
-\end{array}
-\]
-{\bf Solution:}  Start by assigning leaf nodes to each of the sequences with height 0:
-
-\tikzset{vertex/.style = {circle, draw, fill=black!50,inner sep=0pt, minimum width=4pt}}
-\begin{tikzpicture}[thick,scale=1]
-\node at (0,.2) {};
-    \node [vertex,label = below:$A$] at (0,0) (A) {} ;
-    \node [vertex,label = below:$B$] at (1,0) (B) {} ;
-    \node [vertex,label = below:$C$] at (2,0) (C) {} ;
-    \node [vertex,label = below:$D$] at (3,0) (D) {} ;  
-        \node at (4,0)  {0} ;
-
-\end{tikzpicture}
-
-Now choose the pair of clusters that are closest to each other according to the distance matrix $d$.  This is the pair $(A,B)$ with distance $d(A,B) = 4$. Join the cluster $E = A \cup B = \{A,B\}$ which has height $d(A,B)/2 = 2$.
-
-\begin{tikzpicture}[thick,scale=1]
-    \node [vertex,label = below:$A$] at (0,0) (A) {} ;
-    \node [vertex,label = below:$B$] at (1,0) (B) {} ;
-    \node [vertex,label = below:$C$] at (2,0) (C) {} ;
-    \node [vertex,label = below:$D$] at (3,0) (D) {} ;
-    \node [vertex,label = left:$E$] at (0.5,2) (E) {} ;
-    \node at (4,0)  {0} ;
-    \node at (4,1)  {1} ;
-    \node at (4,2)  {2} ;
-         
-     \path (A) edge  (E);
-     \path (B) edge  (E);
-
-\end{tikzpicture}
-
-The distance matrix is by calculating $d(E,C)$ and $d(E,D)$.  $d(E,C) =  \frac1{2\cdot 1}(d(A,C) + d(B,C)) = \frac 1 2 (8+8) = 8$ and similarly for $d(E,D)$.
-\[ \begin{array}{cccc}
-& E&C&D \\
-E & - & 8 & 8 \\
-C &  & - & 6 \\
-D &&& -
-\end{array}
-\]
-Now form the cluster $F = \{C,D\}$ and place the node at $d(C,D)/2 = 3$.
-
-\begin{tikzpicture}[thick,scale=1]
-    \node [vertex,label = below:$A$] at (0,0) (A) {} ;
-    \node [vertex,label = below:$B$] at (1,0) (B) {} ;
-    \node [vertex,label = below:$C$] at (2,0) (C) {} ;
-    \node [vertex,label = below:$D$] at (3,0) (D) {} ;
-    \node [vertex,label = left:$E$] at (0.5,2) (E) {} ;
-    \node [vertex,label = left:$F$] at (2.5,3) (F) {} ;
-    \node at (4,0)  {0} ;
-    \node at (4,1)  {1} ;
-    \node at (4,2)  {2} ;
-    \node at (4,3)  {3} ;
-         
-     \path (A) edge  (E);
-     \path (B) edge  (E);
-     \path (C) edge  (F);
-     \path (D) edge  (F);
-
-\end{tikzpicture}
-
-The distance matrix is now the single distance between the remaining clusters: $d(E,F) = \frac 1 {2\cdot 2} (d(A,C)+d(A,D) + d(B,C)+d(B,D) ) = \frac 1 4 (8+8+8+8) = 8$. So make the last node $G = \{E,F\}$ and place it at height $8/2 = 4$.  The UPGMA tree is thus
-
-\begin{tikzpicture}[thick,scale=1]
-    \node [vertex,label = below:$A$] at (0,0) (A) {} ;
-    \node [vertex,label = below:$B$] at (1,0) (B) {} ;
-    \node [vertex,label = below:$C$] at (2,0) (C) {} ;
-    \node [vertex,label = below:$D$] at (3,0) (D) {} ;
-    \node [vertex,label = left:$E$] at (0.5,2) (E) {} ;
-    \node [vertex,label = left:$F$] at (2.5,3) (F) {} ;
-    \node [vertex,label = left:$G$] at (1.5,4) (G) {} ;
-    \node at (4,0)  {0} ;
-    \node at (4,1)  {1} ;
-    \node at (4,2)  {2} ;
-    \node at (4,3)  {3} ;
-    \node at (4,4)  {4} ;
-         
-     \path (A) edge  (E);
-     \path (B) edge  (E);
-     \path (C) edge  (F);
-     \path (D) edge  (F);
-     \path (E) edge  (G);
-     \path (F) edge  (G);
-
-\end{tikzpicture}
-\sqend
-
-
-%Another commonly used distance method is neighbor-joining.  It is also relatively simple but we omit it here.  See section 7.3 of Durbin, Eddy et al.
-
-
-
-\subsection{Feng-Doolittle progressive alignment}
-
-The Feng-Doolittle algorithm (1987) takes the approach described above.  The steps for aligning $n$ sequences are as follows.  
-\begin{enumerate}
-\item Calculate the $n(n-1)/2$ distances between all sequences pairs.  The distances are found by aligning each pair and recording a normalized score.  The score used is \[D = -\log S_{eff}  = -\log \frac{S_{obs} - S_{rand}}{S_{max} - S_{rand}}\] where $S_{obs}$ is the score from the pairwise alignment, $S_{max}$ is the average of scores obtained by aligning each sequences of the pair to itself and $S_{rand}$ is the expected score for an alignment of the pair when the residues are randomly shuffled. The effective score $S_{eff}$ can thus be
-viewed as a normalised percentage similarity which  roughly decays exponentially towards zero with increasing evolutionary distance.  Thus, we take $ -\log$ to
-make the score decay approximately linearly with evolutionary distance.
-\item Build a guide tree based on the recorded scores (we use UPGMA).
-\item Build the alignment in the order that nodes were added to the tree. 
-\end{enumerate}
-A pair of sequences is aligned in the normal way. A sequence is aligned to an MSA by aligning it to each sequence in the MSA and choosing the highest scoring alignment.  Two alignments  are aligned to each other by aligning all pairs of sequences between the two groups and choosing the best alignment.  
-
-After a sequence or group of sequences is added to an alignment, the introduced gap characters are replaced with a neutral $X$ character which can be aligned to any other character (gap or residue) with no cost. Crucially, there is no penalty for aligning a gap to an $X$  which tends to make gaps align with each other, giving us the characteristic pattern we see in multiple alignments of gaps clustered in columns.
-
-Once the initial MSA has been found, we can use further heuristics to improve it and lessen any effect  of the order in which sequences were added.  For example, we can choose a sequence uniformly at random, remove it from the MSA and then realign it to the the MSA.  This process can be iterated until the MSA becomes stable, that is, no or very few changes occur when a sequence is removed and re-aligned  
-
+%\begin{tikzpicture}
+%\matrix (m) [matrix of nodes,column sep=6mm,row sep = 5 mm]
+%{
+% &  & A & G & T & T & A  \\
+%  &0&0&0&0&0& 0 \\
+% A &0&2&1&0&0&2 \\
+% T &0&0&0&3&2&0 \\
+% A &0&2&1&1&1&4 \\
+%};
+%\draw[draw = red, ->] (m-3-3.north west) -- (m-2-2.south east);
+%\draw[draw = red, ->] (m-3-4.north west) -- (m-2-3.south east);
+%\draw[draw = red, ->] (m-3-7.north west) -- (m-2-6.south east);
+%\draw[draw = red, ->] (m-4-3.north) -- (m-3-3.south);
+%\draw[draw = red, ->] (m-4-4.north west) -- (m-3-3.south east);
+%\draw[draw = red, ->] (m-4-5.north west) -- (m-3-4.south east);
+%\draw[draw = red, ->] (m-4-6.north west) -- (m-3-5.south east);
+%\draw[draw = red, ->] (m-4-7.north) -- (m-3-7.south);
+%\draw[draw = red, ->] (m-4-7.west) -- (m-4-6.east);
+%\draw[draw = red, ->] (m-5-3.north west) -- (m-4-2.south east);
+%\draw[draw = red, ->] (m-5-4.north west) -- (m-4-3.south east);
+%\draw[draw = red, ->] (m-5-6.north west) -- (m-4-5.south east);
+%\draw[draw = red, ->] (m-5-7.north west) -- (m-4-6.south east);
+%\draw[draw = red, ->] (m-5-5.north) -- (m-4-5.south);
+%\end{tikzpicture}
+%
+%The score of the highest scoring local alignment is the largest entry in this matrix.  We find this at $(5,3)$ where $F(5,3) = 4$.  The sub alignment is found by tracing back from that cell and stopping at the first cell with no predecessor (or at the first 0 encountered).  This produces the local alignment 
+%
+%\( \begin{array}{cc}
+%T & A \\
+%T & A
+%\end{array}\)
+% \sqend
+%
+%
+%
+%%\subsection{Variations on a theme}
+%
+%
+%
+%
+%%\subsubsection{Repeated matches}
+%%
+%%In the repeated matches problem, we suppose there is a repeated domain or motif (described by sequence $y$) in a sequence $x$ and we wish to find copies of these repeats. We assume that the score for a match needs to be at least $T > 0$ to ensure spurious matches will not be included. The boundary condition is $F (0, 0) = 0$ and the recurrence is
+%%\[ F_{i,0}= \max 
+%%\begin{cases}
+%%F(i-1,0),\\
+%%F(i-1,j)-T, \, j = 1,\ldots,m;
+%%\end{cases} \]
+%%
+%%\[ F_{i,j}= \max 
+%%\begin{cases}
+%%F(i,0),\\
+%%F(i-1,j-1)+s(x_i,y_i), \\
+%%F(i-1,j)-d, \\
+%%F(i,j-1)-d.
+%%\end{cases} \]
+%%Start the traceback at the additional cell, $F (n + 1, 0)$ (calculated using the rule for $F (i, 0)$).
+%
+%\subsubsection{Overlap matches}
+%
+%As an example of how easy it is to establish different types of alignment algorithm we consider a special type of alignment known as an overlap alignment.  
+%
+%
+%When we expect one sequence to completely contain another or that they overlap, we want a global type alignment that does not penalize the unmatched overhanging ends. The boundary conditions are $F (i, 0) = F (0, j) = 0$ for all $i, j$, the recurrence relation is just the global recurrence and we start the traceback at the position on the right  or top boundary the maximum score taken over all scores on those boundaries is achieved, $F (i, m)$ or $F (n, j)$. The traceback stops when either the left or top border  is reached, $F (i, 0)$ or $F (0, j)$.
+%
+%
+%\subsection{Pairwise alignment with non-linear gap penalties }
+%
+%In our pairwise alignment discussion, we only considered linear gap penalties.  As we noted earlier, linear penalties are a poor model for biological sequence data where we expect gaps (that is, insertions or deletions) to be quite rare but if there is a gap it may be multiple  bases in length.  Thus, an affine penalty, which penalises the start of the gap more heavily than any extension to the gap is favoured.
+%
+%For an arbitrary  gap penalty,  $\gamma(k)$, we can continue to use a similar dynamic programming approach as before, but a direct adoption of that approach results in a much slower algorithm. Let's investigate: With a general gap penalty, $\gamma(k)$, the recurrence relation becomes 
+%\[ F_{i,j}= \max 
+%\begin{cases}
+%F(i-1,j-1)+s(x_i,y_j), \\
+%F(k,j) + \gamma(i - k), \hspace{1cm} k = 0,\ldots,i-1,  \\
+%F(i,k) + \gamma(j-k),\hspace{1cm} k = 0,\ldots,j-1  .
+%\end{cases} \]
+%This means that to calculate the value of each cell in the matrix $F(i,j)$ we need to consider $i+j+1$ other cells --- the $i$ previous cells in the row, the $j$ previous cells in the column, and the one adjacent diagonal cell --- rather than the 3 as we had with the linear gap penalty (see Figure below).  This results in a $O(n^3)$ algorithm rather than a $O(n^2)$
+%
+%To calculate an unknown cell of $F$, the scores for gaps of all possible lengths need to be calculated meaning that a calculation for each previous cell in the row and column needs to be made: \\
+%\begin{tikzpicture}
+%\matrix (m) [matrix of nodes,column sep=3mm,row sep = 3 mm, style={nodes={rectangle,draw,minimum width=4em}}]
+%{
+% &  & A & G & T & T & A  \\
+%  &0&-2&-4&-6&-8& -10 \\
+% A &-2&2&0&-2&-4&-6 \\
+% T &-4&0&0&? & & \\
+% A & & & & & &   \\
+%};
+%\draw[draw = red, <-] (m-4-5.south) to [bend left = 15] (m-4-4.south east);
+%\draw[draw = red, <-] (m-4-5.south) to [bend left = 30] (m-4-3.south east);
+%\draw[draw = red, <-] (m-4-5.south) to [bend left = 45] (m-4-2.south east);
+%\draw[draw = red, <-] (m-4-5.east) to [bend right = 25] (m-3-5.south east);
+%\draw[draw = red, <-] (m-4-5.east) to [bend right = 35] (m-2-5.south east);
+%\draw[draw = red, <-] (m-4-5.north west) to (m-3-4.south east);
+%\end{tikzpicture}
+%
+%
+%\subsection{Alignment with affine gap scores}
+%
+%
+%In the case of an affine gap score (which has the form $\gamma(k) = -d - (k-1)e$\,) it turns out that we can, once again, construct a $O(n^2)$ dynamic programming algorithm to solve the alignment problem.
+%The only difficulty is that we now have to keep track of 3 possible states corresponding to 3 cases:
+%\begin{enumerate}
+%\item Let $M(i,j)$ be the best score of the alignment up to $(i,j)$ given that $x_i$ is aligned to $y_j$. This case looks like\\
+%{\tt A C C $\mathtt{x_i}$ \\
+%A C G $\mathtt{y_j}$}
+%\item Let $I_x(i,j)$ be the best score of the alignment up to $(i,j)$ given that $x_i$ is aligned to a gap. This case looks like\\
+%{\tt A C C $\mathtt{x_i}$ \\
+%  G $\mathtt{y_j}$   - -}
+%\item Let $I_y(i,j)$ be the best score of the alignment up to $(i,j)$ given that $y_j$ is aligned to a gap. This case looks like\\
+%{\tt  C C $\mathtt{x_i}$  - \\ 
+%A C G  $\mathtt{y_j}$ }
+%\end{enumerate}
+%Given those definitions, and assuming that a gap cannot directly follow an insertion (that is, we can't go directly from $I_x$ to $I_y$ or vice versa), we have the following recurrence relations:
+%\[ M(i,j)= \max 
+%\begin{cases}
+%M(i-1,j-1)+s(x_i,y_j), \\
+%I_x(i-1,j-1)+s(x_i,y_j), \\
+%I_y(i-1,j-1)+s(x_i,y_j); 
+%\end{cases} \]
+%\[ I_x(i,j)= \max 
+%\begin{cases}
+%M(i-1,j)-d, \\
+%I_x(i-1,j)-e; 
+%\end{cases} \mbox{and}, \]
+%\[ I_y(i,j)= \max 
+%\begin{cases}
+%M(i,j-1)-d, \\
+%I_y(i,j-1)-e. 
+%\end{cases} \]
+%It should be clear that we can calculate this recursion efficiently using tabular computation where we have 3 arrays: one for each of $M$, $I_x$ and $I_y$.  We can use a similar back-tracking mechanism to find the best alignment once we have calculated the scores.  
+%
+%This results in an quadratic time and space algorithm once again but the coefficient of the quadratic term is greater for this algorithm than the linear gap penalty one.  For example, the space requirement here is $3n^2$ while it is only $n^2$ with a linear gap penalty.  
+%
+%The above recursions can be very neatly represented as a {\em finite state automaton}, or FSA.  
+%
+%\begin{figure}[ht]
+%\centering
+%\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=4cm,
+%                    semithick,every text node part/.style={align=center}]
+%  \tikzstyle{every state}=[fill=none,draw=black,text=black]
+%
+%  \node[state] (M)                    {$ M$\\$ (+1,+1)$};
+%  \node[state]         (Ix) [above right of=M] {$I_x$\\$(+1,0)$};
+%  \node[state]         (Iy) [below right of=M]       {$I_y$\\$ (0,+1)$};
+%
+%  \path (M) edge       [bend left]        node {$-d$} (Ix)
+%          (M) edge [loop left] node {$s(x_i,y_j)$} (M)
+%          (Ix) edge       [bend left]        node {$s(x_i,y_j)$} (M)
+%          (Ix) edge [loop right] node {$-e$} (Ix)
+%          (Iy) edge       [bend left]        node {$s(x_i,y_j)$} (M)
+%          (Iy) edge [loop right] node {$-e$} (Iy)
+%          (M) edge [bend left] node {$-d$} (Iy);
+% \end{tikzpicture}
+%\caption{A finite state automaton describing the affine gap alignment recurrence relation. The pairs of numbers below the state names indicate how we  increment the position in sequence $x$ and $y$. }
+% \label{fig:fsa}
+% \end{figure}
+% 
+% 
+% In an FSA, each of the three possibilities, match, insertion in $x$ or insertion in $y$, corresponds to a state (drawn as circles).  
+% 
+% The transitions each carry a score, as indicated next to the arrow.
+% 
+% The new value for the state variable at $(i,j)$ is the maximum of the scores corresponding to the transitions coming into the state.  Each transition score is given by is given by the value of the source state at the offsets specified by the $\delta (i,j)$ pair of the target state plus the specified score increment.
+% 
+% An alignment corresponds to a path through the states.
+% 
+% \begin{verbatim}
+%V  L  S  P  A  D  -  K
+%H  L  -  -  A  E  S  K
+%
+%m  m  Ix Ix m  m  Iy m
+%\end{verbatim}
+%
+% 
+% These automata are known in computer science as Moore machines.
+% 
+% We've already seen one type of FSA: a Markov chain can be represented as a stochastic FSA.  We'll look at another stochastic FSA, the hidden Markov model or HMM, shortly.
+%
+%\subsection{Linear space alignment}
+%
+%If sequences are large, even a quadratic algorithm can be difficult to work with.  We can't improve the speed of the algorithm but we can reduce the amount of memory we need (currently at that is $O(n^2)$ too).
+%
+%If all we require is the {\em score} of the best alignment, we immediately see that we don't need to keep the whole matrix until the end of the alignment.  In the case of global alignment, the score of the best alignment is given by the entry $F(m,n)$.  To calculate any score in the $i$th row, all we need to know is the $(i-1)$th row, so we only need to keep the a single row of the matrix in memory.  A similar argument can be made for the score of the best local alignment.
+%
+%If we actually want the best alignment, it turns out that we can still produce a linear space algorithm.  We employ  a {\em divide and conquer} approach.  Suppose we could find a cell, $(i^\ast,j^\ast)$ what we knew to lie on the optimal alignment.  Then we could divide the alignment problem into two halves: from $(0,0)$ to $(i^\ast,j^\ast)$ then from $(i^\ast,j^\ast)$ to $(m,n)$.  In the best case, this reduces the amount of storage space require by 2.  This process can be iterated, so  $(i^{\ast \ast},j^{\ast \ast})$ is found to reduce the space required for the $(0,0)$ to $(i^\ast,j^\ast)$ section and so on.   It turns out that given an $i^\ast$, a suitable $j^\ast$ can be found.   We omit the details here (they are not too difficult) but  details and references are given towards the end of chapter 2 in the Durbin et al book.
+%
+%
+%\section{Multiple sequence alignments (MSA)}
+%
+%In pairwise alignment, we were given two sequences, $x$ and $y$ and wanted to align them by judiciously inserting gaps so that homologous residues were lined up with one another.  
+%
+%Multiple alignment is similar except now we have $k \geq 3$ sequences to align, so we want to form columns of homologous residues by adding gaps to each sequence.  
+%
+%Experts can construct multiple alignments by hand by considering a number of factors like secondary and tertiary protein structure, highly conserved regions, patterns of gaps, evolutionary processes etc.    This is, however, subjective, difficult and tedious. 
+%
+%We want to come up with a method that is probabilistic, automatic and produces alignments that experts are happy with.
+%
+%A good entry point to understanding the problem of global alignment is the {\tt Phylo} puzzle game at \url{http://phylo.cs.mcgill.ca/} where you work on short multiple alignments by hand. 
+%
+%
+%
+%%\subsubsection{Resources}
+%%
+%%Read chapter 6 of the Durbin et al book.
+%%
+%%An online lecture from BioSci742 covers much of this material: \url{http://www.fos.auckland.ac.nz/~biosci742/3_6.html}.  In particular, check out the applet showing how progressive MSA is performed: \url{http://www.fos.auckland.ac.nz/~biosci742/applets/multseqalign.html}.
+%%
+%%The Clustal$\Omega$ website: \url{http://www.clustal.org/omega/} and paper: \url{http://www.nature.com/msb/journal/v7/n1/full/msb201175.html}. 
+%
+%\subsection{Dynamic programming}
+%
+%It is tempting to try to extend the dynamic programming methods that we used for pairwise alignments to the MSA problem.  It is relatively easy to write down the naive extension of pairwise alignment algorithms to more than 2 sequences. But the naive implementation quickly becomes impossible as the number of sequences and the length of the sequences increases.  
+%
+%For example, for 2 sequences of length $L$, the Needleman-Wunsch algorithm requires a 2-dimensional array with $L^2$ cells in total to be stored in memory.  The MSA analogue on $n$ sequences  requires storing an $n$-dimensional array containing  $L^n$ cells in total.  Even for short sequences of $L = 100$, we would require memory for $100^5 = 10^{10}$ cells (at 4 bytes per cell, that's about 37 GB).  
+%
+%Some clever work from Lipman, Altschul and Kececioglu (the first two co-wrote BLAST) managed to reduce the size of the space that needs to be considered.  That is, instead of calculating all $L^n$ cells, they calculate upper and lower bounds on the score of the best MSA and then need only calculate the cells in the $n$-dimensional array that will produce scores lying between these two bounds.   This work allows a few sequences (5-10) of moderate length (300 residues) and not too far diverged to be optimally aligned but even this requires a large computational resource.
+%
+%
+%\subsection{Progressive alignment}
+%
+%Finding the optimal MSA is computationally  prohibitive, as discussed in the previous Section.  Typically, we resort to finding a good-enough alignment using heuristic techniques.  The most widely used heuristic is progressive alignment.  
+%
+%Progressive alignment involves a series of successive pairwise alignments.  At it's most basic, an initial pair of sequences are chosen and aligned, a third is chosen and aligned to the first two and so on until all sequences are included in the MSA.  Other methods also allow the aligning of two alignments to each other.  For example, if there are 4 sequences, two pairs may be aligned first then the two alignments aligned to complete the MSA. 
+%
+%These methods require that we can: decide on an order in which to align the sequences, align two sequences together, align a sequences to a MSA and align two MSAs together.  
+%
+%The typical way to decide on the order in which to align the sequences is to build a guide tree, using a clustering methods such as UPGMA, and align sequences in the order that nodes occur from the leaves to the root of the tree. 
+%  
+%\subsection{Building trees with distances and UPGMA} \label{sec:UPGMA}
+%
+%%The fastest ways of constructing trees rely on defining a distance between sequences.  There are numerous ways of defining distances between sequences.  The simplest, for an aligned pair of sequences $x$ and $y$ of length $L$ is to count the number of positions where they differ, $D_{xy}$ say, and define the distance to be  $f_{xy} = D_{xy}/L$, that is, the fraction of sites at which they differ.  This method works well for  related sequences where $f$ is expected to be small, but doesn't grow as much as we would like as sequences become less and less related since even unrelated sequences share many bases in common due to chance.
+%
+%%The Jukes-Cantor distance is based on the simplest model of sequence evolution where mutations between all four bases are equally likely.  The distance is defined by $d_{xy} = -\frac34 \log {(1- \frac{4f_{xy}}3)}$. The Jukes-Cantor distance tends to infinity as the fraction of shared residues tends to the expected background level for unrelated sequences.
+%
+%UPGMA is a method of building trees based on distances: we are given a set of objects, and for each pair of objects we have some measure of the distance between them.  
+%
+%UPGMA stands for unweighted pair group method using arithmetic averages and is a simple method with an ugly name.  The idea can be thought of as a clustering algorithm where we start with all individual sequences  and start clustering them together, building the tree up from the leaves to the root.  The height of the internal nodes (or, equivalently, the edge lengths) is determined by the distances between the two clusters being joined.  
+%
+%For two sequences, $x$ and $y$, we assume we have a method of defining the distance $d_{xy}$.  We define the distance between two clusters of sequences, $C_i$ and $C_j$ as the average distance between all pairs between clusters:
+%\[ d_{ij} = \frac1{|C_i| |C_j|}\sum_{x \in C_i,y \in C_j} d_{xy}\]
+%where $|C|$ is the number of sequences in cluster $C$.
+%
+%We define the algorithm as follows:
+%\begin{description}
+%\item[Initialise]  Assign each sequence $i$ to it's own cluster $C_i$. Assign a leaf node to each cluster and give it height 0.
+%\item[Repeat until there only one cluster remains]  Find clusters $C_i$ and $C_j$ such that $d_{ij}$ is minimal (choose randomly between equidistant candidates). 
+%
+%Join $i$ and $j$ to make the new cluster $C_k = C_i \cup C_j$.
+%
+%Define a node $k$ in the tree placed at height $d_{ij}/2$ with child nodes $i$ and $j$.
+%
+%Update the distance matrix.
+%\end{description}
+%
+%This procedure results in a well-defined tree (we need to check that all node heights are above the heights of the their children).  The algorithm is quadratic ($O(n^2)$) in the number of sequences.
+%
+%
+%{\bf Example:} Given 4 sequences, $A,B,C$ and $D$, which have the pairwise distances given by the distance matrix $d$ below, construct the UPGMA tree.
+%\[ d= \begin{array}{ccccc}
+%& A& B&C&D \\
+%A &-&4 & 8 & 8 \\
+%B & & - & 8 & 8 \\
+%C & & & - & 6 \\
+%D &&&& -
+%\end{array}
+%\]
+%{\bf Solution:}  Start by assigning leaf nodes to each of the sequences with height 0:
+%
+%\tikzset{vertex/.style = {circle, draw, fill=black!50,inner sep=0pt, minimum width=4pt}}
+%\begin{tikzpicture}[thick,scale=1]
+%\node at (0,.2) {};
+%    \node [vertex,label = below:$A$] at (0,0) (A) {} ;
+%    \node [vertex,label = below:$B$] at (1,0) (B) {} ;
+%    \node [vertex,label = below:$C$] at (2,0) (C) {} ;
+%    \node [vertex,label = below:$D$] at (3,0) (D) {} ;  
+%        \node at (4,0)  {0} ;
+%
+%\end{tikzpicture}
+%
+%Now choose the pair of clusters that are closest to each other according to the distance matrix $d$.  This is the pair $(A,B)$ with distance $d(A,B) = 4$. Join the cluster $E = A \cup B = \{A,B\}$ which has height $d(A,B)/2 = 2$.
+%
+%\begin{tikzpicture}[thick,scale=1]
+%    \node [vertex,label = below:$A$] at (0,0) (A) {} ;
+%    \node [vertex,label = below:$B$] at (1,0) (B) {} ;
+%    \node [vertex,label = below:$C$] at (2,0) (C) {} ;
+%    \node [vertex,label = below:$D$] at (3,0) (D) {} ;
+%    \node [vertex,label = left:$E$] at (0.5,2) (E) {} ;
+%    \node at (4,0)  {0} ;
+%    \node at (4,1)  {1} ;
+%    \node at (4,2)  {2} ;
+%         
+%     \path (A) edge  (E);
+%     \path (B) edge  (E);
+%
+%\end{tikzpicture}
+%
+%The distance matrix is by calculating $d(E,C)$ and $d(E,D)$.  $d(E,C) =  \frac1{2\cdot 1}(d(A,C) + d(B,C)) = \frac 1 2 (8+8) = 8$ and similarly for $d(E,D)$.
+%\[ \begin{array}{cccc}
+%& E&C&D \\
+%E & - & 8 & 8 \\
+%C &  & - & 6 \\
+%D &&& -
+%\end{array}
+%\]
+%Now form the cluster $F = \{C,D\}$ and place the node at $d(C,D)/2 = 3$.
+%
+%\begin{tikzpicture}[thick,scale=1]
+%    \node [vertex,label = below:$A$] at (0,0) (A) {} ;
+%    \node [vertex,label = below:$B$] at (1,0) (B) {} ;
+%    \node [vertex,label = below:$C$] at (2,0) (C) {} ;
+%    \node [vertex,label = below:$D$] at (3,0) (D) {} ;
+%    \node [vertex,label = left:$E$] at (0.5,2) (E) {} ;
+%    \node [vertex,label = left:$F$] at (2.5,3) (F) {} ;
+%    \node at (4,0)  {0} ;
+%    \node at (4,1)  {1} ;
+%    \node at (4,2)  {2} ;
+%    \node at (4,3)  {3} ;
+%         
+%     \path (A) edge  (E);
+%     \path (B) edge  (E);
+%     \path (C) edge  (F);
+%     \path (D) edge  (F);
+%
+%\end{tikzpicture}
+%
+%The distance matrix is now the single distance between the remaining clusters: $d(E,F) = \frac 1 {2\cdot 2} (d(A,C)+d(A,D) + d(B,C)+d(B,D) ) = \frac 1 4 (8+8+8+8) = 8$. So make the last node $G = \{E,F\}$ and place it at height $8/2 = 4$.  The UPGMA tree is thus
+%
+%\begin{tikzpicture}[thick,scale=1]
+%    \node [vertex,label = below:$A$] at (0,0) (A) {} ;
+%    \node [vertex,label = below:$B$] at (1,0) (B) {} ;
+%    \node [vertex,label = below:$C$] at (2,0) (C) {} ;
+%    \node [vertex,label = below:$D$] at (3,0) (D) {} ;
+%    \node [vertex,label = left:$E$] at (0.5,2) (E) {} ;
+%    \node [vertex,label = left:$F$] at (2.5,3) (F) {} ;
+%    \node [vertex,label = left:$G$] at (1.5,4) (G) {} ;
+%    \node at (4,0)  {0} ;
+%    \node at (4,1)  {1} ;
+%    \node at (4,2)  {2} ;
+%    \node at (4,3)  {3} ;
+%    \node at (4,4)  {4} ;
+%         
+%     \path (A) edge  (E);
+%     \path (B) edge  (E);
+%     \path (C) edge  (F);
+%     \path (D) edge  (F);
+%     \path (E) edge  (G);
+%     \path (F) edge  (G);
+%
+%\end{tikzpicture}
+%\sqend
+%
+%
+%%Another commonly used distance method is neighbor-joining.  It is also relatively simple but we omit it here.  See section 7.3 of Durbin, Eddy et al.
+%
+%
+%
+%\subsection{Feng-Doolittle progressive alignment}
+%
+%The Feng-Doolittle algorithm (1987) takes the approach described above.  The steps for aligning $n$ sequences are as follows.  
+%\begin{enumerate}
+%\item Calculate the $n(n-1)/2$ distances between all sequences pairs.  The distances are found by aligning each pair and recording a normalized score.  The score used is \[D = -\log S_{eff}  = -\log \frac{S_{obs} - S_{rand}}{S_{max} - S_{rand}}\] where $S_{obs}$ is the score from the pairwise alignment, $S_{max}$ is the average of scores obtained by aligning each sequences of the pair to itself and $S_{rand}$ is the expected score for an alignment of the pair when the residues are randomly shuffled. The effective score $S_{eff}$ can thus be
+%viewed as a normalised percentage similarity which  roughly decays exponentially towards zero with increasing evolutionary distance.  Thus, we take $ -\log$ to
+%make the score decay approximately linearly with evolutionary distance.
+%\item Build a guide tree based on the recorded scores (we use UPGMA).
+%\item Build the alignment in the order that nodes were added to the tree. 
+%\end{enumerate}
+%A pair of sequences is aligned in the normal way. A sequence is aligned to an MSA by aligning it to each sequence in the MSA and choosing the highest scoring alignment.  Two alignments  are aligned to each other by aligning all pairs of sequences between the two groups and choosing the best alignment.  
+%
+%After a sequence or group of sequences is added to an alignment, the introduced gap characters are replaced with a neutral $X$ character which can be aligned to any other character (gap or residue) with no cost. Crucially, there is no penalty for aligning a gap to an $X$  which tends to make gaps align with each other, giving us the characteristic pattern we see in multiple alignments of gaps clustered in columns.
+%
+%Once the initial MSA has been found, we can use further heuristics to improve it and lessen any effect  of the order in which sequences were added.  For example, we can choose a sequence uniformly at random, remove it from the MSA and then realign it to the the MSA.  This process can be iterated until the MSA becomes stable, that is, no or very few changes occur when a sequence is removed and re-aligned  
+%
 
 \newpage 
 
@@ -1466,7 +1466,7 @@ A result known as the {\em Chapman-Kolmogorov equations} tells us $P_{m+n} = P_m
 
 \newpage
  
-\section{Hidden Markov Models}
+\section{Hidden Markov Models}\label{sec:HMM}
 
 
 In Markov models, we directly observe the state of the process (for example, in a random walk, the state is completely described by the position of the random walker). We can easily imagine a system where we don't directly observe the state but observe some outcome which depends on the state. Call the observed outcomes {\em symbols}.  We thus make a distinction between the {\bf sequence of states} and the {\bf sequence of symbols}.  We formally model these systems as hidden Markov models (HMMs).
@@ -2345,7 +2345,7 @@ The GHMM produces a set of states $q = q_1\ldots q_n$ with an associated set of 
 \label{fig:genehmm}
 \end{figure}
 
-%%}%end not in exam
+\end{document}
 
 \clearpage
 
