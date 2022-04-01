@@ -26,11 +26,11 @@
 
 \DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
 
-\title{369 Computational Biology}
+\title{CompSci 369 Computational Methods in Interdisciplinary Science}
 % Maximisation, matrix decomposition, probability, inference, simulation, bioinformatics and phylogenetics}
-\author{Compiled, collated and written by David Welch\\ 
+\author{Notes for weeks 5-12 \\ Compiled, collated and written by David Welch\\ 
 Sections \ref{sec:HMM}--\ref{sec:HMMapplication} are\\ based on the book Biological Sequence Analysis by Durbin et al. 2010. \\ Other sections are incompletely referenced so \\ presence in these notes is no claim of authorship.}
-\date{2019}                                           % Activate to display a given date or no date
+\date{2022}                                           % Activate to display a given date or no date
 \begin{document}
 \maketitle
 
@@ -71,7 +71,7 @@ The fundamental objects we will be studying are sequences of characters represen
 
 In eukaryotes (organisms with cells that  have a nucleus), the three types of sequences related to each other by the Central Dogma of  Molecular Biology that states, DNA makes RNA makes Protein.  Or, more prosaically,   DNA is {\em transcribed} into a type of RNA called mRNA that is then {\em translated} into protein.  
 
-There are some good animations showing how translation and transcription work at \url{www.hhmi.org/biointeractive/animations/index.html}, in particular see the DNA transcription and translation animations.  A Japanese anime style film of the central dogma is also worth a look: \url{http://www.youtube.com/watch?v=-ygpqVr7_xs}. 
+There are some good animations showing how translation and transcription work at \url{https://www.biointeractive.org/classroom-resources}, in particular see the  \href{https://www.biointeractive.org/classroom-resources/dna-transcription-basic-detail}{DNA transcription} and  \href{https://www.biointeractive.org/classroom-resources/translation-basic-detail}{translation} animations.  A Japanese anime style film of the central dogma is also worth a look if a little dated now: \url{http://www.youtube.com/watch?v=-ygpqVr7_xs}. 
 
 Parts of the the DNA sequence encode information for proteins.  These regions are known as genes and must be transcribed to RNA before being built into proteins.  When the DNA is transcribed to RNA, all bases are copied exactly except that $T$ (thymine) is transcribed as $U$ (uracil).  Once copied, the RNA is edited at splice sites so that only exons remain (the introns are edited out).  This leaves the {\em messenger RNA}, mRNA, which is then  translated to a protein sequence (poly-peptide chain).  This translation  occurs via the genetic code which translates consecutive triples of RNA bases (known as a codon) into one of the 20 amino acids.  There are $4^3 = 64$ possible codes since there is an alphabet of 4 bases.  60 of these code for proteins, 1 (AUG) is a start codon and 3 (UAA, UGA and UAG) are stop codons signalling the start or finish of a protein.  A particular  amino acid may be encoded by just one codon (e.g. AUG$\rightarrow$Methionine(M)) or up to 6 (e.g. any of  UUA, UUG, CUU, CUC, CUA, CUG$\rightarrow$Leucine (L)).    Once the poly-peptide chain is formed it folds into three dimensional molecule, taking on a particular structure.
 
