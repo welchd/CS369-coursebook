@@ -512,7 +512,7 @@ T & A
 As an example of how easy it is to establish different types of alignment algorithm we consider a special type of alignment known as an overlap alignment.  
 
 
-When we expect one sequence to completely contain another or that they overlap, we want a global type alignment that does not penalize the unmatched overhanging ends. The boundary conditions are $F (i, 0) = F (0, j) = 0$ for all $i, j$, the recurrence relation is just the global recurrence and we start the traceback at the position on the right  or top boundary the maximum score taken over all scores on those boundaries is achieved, $F (i, m)$ or $F (n, j)$. The traceback stops when either the left or top border  is reached, $F (i, 0)$ or $F (0, j)$.
+When we expect one sequence to completely contain another or that they overlap, we want a global type alignment that does not penalize the unmatched overhanging ends. The boundary conditions are $F (i, 0) = F (0, j) = 0$ for all $i, j$, the recurrence relation is just the global recurrence and we start the traceback at the position on the right  or bottom boundary the maximum score taken over all scores on those boundaries is achieved, $F (i, m)$ or $F (n, j)$. The traceback stops when either the left or top border  is reached, $F (i, 0)$ or $F (0, j)$.
 
 
 \subsection{Pairwise alignment with non-linear gap penalties }
